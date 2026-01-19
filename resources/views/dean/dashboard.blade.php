@@ -1,0 +1,372 @@
+@extends('layouts.sidebar')
+
+@section('title', 'Dean Dashboard')
+@section('page-title', 'Dean Dashboard')
+
+@push('styles')
+<style>
+/* Student Panel Design - Green Gradient Cards */
+.animated-stat-card {
+    position: relative;
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    animation: slideInUp 0.8s ease-out forwards;
+    animation-delay: var(--delay);
+    perspective: 1000px;
+}
+
+.animated-stat-card[data-delay="0"] { --delay: 0s; }
+.animated-stat-card[data-delay="100"] { --delay: 0.1s; }
+.animated-stat-card[data-delay="200"] { --delay: 0.2s; }
+.animated-stat-card[data-delay="300"] { --delay: 0.3s; }
+
+@keyframes slideInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateY(-5px) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card-inner {
+    position: relative;
+    background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+    border-radius: 20px;
+    padding: 24px;
+    height: 140px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow:
+        0 10px 30px rgba(5, 150, 105, 0.3),
+        0 5px 15px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.animated-stat-card:hover .card-inner {
+    transform: translateY(-8px) rotateX(5deg);
+    box-shadow:
+        0 20px 40px rgba(5, 150, 105, 0.4),
+        0 15px 25px rgba(5, 150, 105, 0.3),
+        0 10px 15px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.card-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.animated-stat-card:hover .card-glow {
+    opacity: 1;
+}
+
+.card-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+}
+
+.stat-info {
+    color: white;
+}
+
+.stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-icon {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.stat-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 4px;
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.stat-subtitle {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.stat-visual {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.pulse-ring, .pulse-ring-2 {
+    position: absolute;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.pulse-ring {
+    width: 40px;
+    height: 40px;
+    top: 10px;
+    left: 10px;
+}
+
+.pulse-ring-2 {
+    width: 60px;
+    height: 60px;
+    top: 0;
+    left: 0;
+    animation-delay: 1s;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* Content Cards */
+.content-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.content-card-header {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    padding: 1.5rem;
+}
+
+.content-card-body {
+    padding: 1.5rem;
+}
+</style>
+@endpush
+
+@section('content')
+<div class="space-y-6">
+
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6" id="statsContainer">
+        <!-- Pending Dean Notes -->
+        <div class="animated-stat-card group" data-delay="0">
+            <div class="card-inner">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="flex items-center justify-between">
+                        <div class="stat-info">
+                            <div class="stat-icon-wrapper">
+                                <i class="fas fa-clock stat-icon"></i>
+                            </div>
+                            <h3 class="stat-title">Pending Reviews</h3>
+                            <p class="stat-number">{{ $pendingDeanNotes }}</p>
+                            <p class="stat-subtitle">Awaiting dean note</p>
+                        </div>
+                        <div class="stat-visual">
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Activities -->
+        <div class="animated-stat-card group" data-delay="100">
+            <div class="card-inner">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="flex items-center justify-between">
+                        <div class="stat-info">
+                            <div class="stat-icon-wrapper">
+                                <i class="fas fa-list-alt stat-icon"></i>
+                            </div>
+                            <h3 class="stat-title">School Activities</h3>
+                            <p class="stat-number">{{ $departmentActivities }}</p>
+                            <p class="stat-subtitle">Total activities</p>
+                        </div>
+                        <div class="stat-visual">
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Noted Activities -->
+        <div class="animated-stat-card group" data-delay="200">
+            <div class="card-inner">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="flex items-center justify-between">
+                        <div class="stat-info">
+                            <div class="stat-icon-wrapper">
+                                <i class="fas fa-check-circle stat-icon"></i>
+                            </div>
+                            <h3 class="stat-title">Activities Noted</h3>
+                            <p class="stat-number">{{ $notedActivities }}</p>
+                            <p class="stat-subtitle">Reviewed by me</p>
+                        </div>
+                        <div class="stat-visual">
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- This Month Activities -->
+        <div class="animated-stat-card group" data-delay="300">
+            <div class="card-inner">
+                <div class="card-glow"></div>
+                <div class="card-content">
+                    <div class="flex items-center justify-between">
+                        <div class="stat-info">
+                            <div class="stat-icon-wrapper">
+                                <i class="fas fa-calendar-alt stat-icon"></i>
+                            </div>
+                            <h3 class="stat-title">This Month</h3>
+                            <p class="stat-number">{{ $thisMonthActivities }}</p>
+                            <p class="stat-subtitle">Recent activities</p>
+                        </div>
+                        <div class="stat-visual">
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- Activities Awaiting Note and Recent School Activities -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Activities Awaiting Note -->
+        <div class="content-card">
+            <div class="content-card-header">
+                <h3 class="text-lg font-semibold flex items-center">
+                    <i class="fas fa-clipboard-list mr-2"></i>
+                    Activities Awaiting Review
+                </h3>
+            </div>
+            <div class="content-card-body">
+                @if($activitiesAwaitingNote->count() > 0)
+                    <div class="space-y-4">
+                        @foreach($activitiesAwaitingNote as $activity)
+                            <div class="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-200">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-green-900">{{ $activity->title }}</div>
+                                    <div class="text-xs text-green-700">
+                                        By {{ $activity->user->name }} • {{ $activity->created_at->format('M d, Y') }}
+                                    </div>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <a href="{{ route('dean.show-activity', $activity) }}" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md transition-all duration-200">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        Review
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    @if($activitiesAwaitingNote->count() >= 10)
+                        <div class="mt-4 text-center">
+                            <a href="{{ route('dean.pending-reviews') }}" class="text-green-600 hover:text-green-700 text-sm font-medium">View all pending reviews</a>
+                        </div>
+                    @endif
+                @else
+                    <div class="text-center py-8">
+                        <i class="fas fa-check-circle text-green-500 text-3xl mb-3"></i>
+                        <p class="text-gray-600">No activities pending review</p>
+                        <p class="text-gray-500 text-sm">All caught up!</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Recent School Activities -->
+        <div class="content-card">
+            <div class="content-card-header">
+                <h3 class="text-lg font-semibold flex items-center">
+                    <i class="fas fa-history mr-2"></i>
+                    Recent School Activities
+                </h3>
+            </div>
+            <div class="content-card-body">
+                @if($recentDepartmentActivities->count() > 0)
+                    <div class="space-y-4">
+                        @foreach($recentDepartmentActivities as $activity)
+                            <div class="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-200">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-green-900">{{ $activity->title }}</div>
+                                    <div class="text-xs text-green-700">
+                                        By {{ $activity->user->name }} • {{ $activity->created_at->format('M d, Y') }}
+                                    </div>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        @if($activity->workflow_status === 'approved_by_vp') bg-green-100 text-green-800
+                                        @elseif($activity->workflow_status === 'rejected') bg-red-100 text-red-800
+                                        @else bg-yellow-100 text-yellow-800 @endif">
+                                        {{ $activity->getCurrentApprovalStepName() }}
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="mt-4 text-center">
+                        <a href="{{ route('dean.pending-reviews') }}" class="text-green-600 hover:text-green-700 text-sm font-medium">View all activities</a>
+                    </div>
+                @else
+                    <div class="text-center py-8">
+                        <i class="fas fa-inbox text-green-500 text-3xl mb-3"></i>
+                        <p class="text-gray-600">No recent activities</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

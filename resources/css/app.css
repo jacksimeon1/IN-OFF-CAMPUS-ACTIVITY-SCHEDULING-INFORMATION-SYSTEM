@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global Responsive System - Same Layout, Proportional Scaling */
+@layer utilities {
+    /* Base responsive scaling using CSS zoom and font-size */
+    html {
+        font-size: 16px; /* Base font size */
+    }
+
+    body {
+        min-width: 320px; /* Minimum supported width */
+        overflow-x: auto; /* Allow horizontal scroll if needed */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Enable smooth horizontal scrolling for all containers */
+    .overflow-x-auto,
+    .table-responsive,
+    .min-w-full {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Preserve table layouts */
+    table {
+        min-width: max-content;
+    }
+
+    /* Responsive breakpoints with proportional scaling */
+    @media (max-width: 1400px) {
+        html { font-size: 15px; }
+        body { zoom: 0.95; }
+    }
+
+    @media (max-width: 1200px) {
+        html { font-size: 14px; }
+        body { zoom: 0.9; }
+    }
+
+    @media (max-width: 992px) {
+        html { font-size: 13px; }
+        body { zoom: 0.85; }
+    }
+
+    @media (max-width: 768px) {
+        html { font-size: 12px; }
+        body { zoom: 0.8; }
+    }
+
+    @media (max-width: 576px) {
+        html { font-size: 11px; }
+        body { zoom: 0.75; }
+    }
+
+    @media (max-width: 480px) {
+        html { font-size: 10px; }
+        body { zoom: 0.7; }
+    }
+
+    @media (max-width: 360px) {
+        html { font-size: 9px; }
+        body { zoom: 0.65; }
+    }
+
+    @media (max-width: 320px) {
+        html { font-size: 8px; }
+        body { zoom: 0.6; }
+    }
+
+    /* Ensure all interactive elements remain accessible */
+    button, input, select, textarea, a {
+        min-height: 24px;
+        min-width: 24px;
+    }
+
+    /* Preserve aspect ratios for images and media */
+    img, video, iframe {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Maintain sidebar and navigation layouts */
+    .sidebar, .admin-sidebar, nav {
+        flex-shrink: 0;
+    }
+
+    /* Ensure modals and overlays work on all screen sizes */
+    .modal, .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    /* Admin Layout Fixes */
+    .admin-main {
+        margin-top: 160px !important;
+        padding-top: 20px !important;
+        min-height: calc(100vh - 160px) !important;
+    }
+
+    /* Navbar fixes */
+    .admin-navbar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1000 !important;
+    }
+}
+
+/* Global stronger shadows for white dashboard cards (match admin dashboard) */
+.content-card {
+    background: #ffffff !important;
+    border-radius: 0.5rem; /* match sm:rounded-lg */
+    /* Stronger default shadow (approx Tailwind shadow-lg) */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border: none;
+    transition: none;
+}
+
+.content-card:hover {
+    /* Slightly stronger on hover for depth (approx Tailwind shadow-2xl) */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: none;
+}
+
+/* Override Tailwind-style white cards using shadow-sm to have stronger shadows
+   without changing the markup. Applies across all dashboards. */
+.bg-white.shadow-sm {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.bg-white.shadow-sm:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
