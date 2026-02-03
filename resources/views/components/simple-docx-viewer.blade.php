@@ -1,9 +1,11 @@
+@props(['filename', 'title' => 'Document'])
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Viewer - {{ $filename }}</title>
+    <title>{{ $title }} - {{ $filename }}</title>
     <style>
         * {
             margin: 0;
@@ -28,7 +30,6 @@
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             z-index: 1000;
-            position: relative;
         }
 
         .header h1 {
@@ -74,54 +75,12 @@
             background: #4b5563;
         }
 
-        .btn-info {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-info:hover {
-            background: #2563eb;
-        }
-
         .viewer-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-        }
-
-        .viewer-tabs {
-            background: #fff;
-            border-bottom: 1px solid #e0e0e0;
-            padding: 0 2rem;
-            display: flex;
-            gap: 1rem;
-        }
-
-        .tab-btn {
-            padding: 0.75rem 1rem;
-            border: none;
-            background: none;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-        }
-
-        .tab-btn.active {
-            border-bottom-color: #059669;
-            color: #059669;
-            font-weight: 600;
-        }
-
-        .tab-btn:hover {
-            background: #f9fafb;
-        }
-
-        .viewer-content {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
+            background: white;
         }
 
         .viewer-iframe {
@@ -195,6 +154,34 @@
             margin-bottom: 1rem;
         }
 
+        .viewer-tabs {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: #059669;
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .tab-btn:hover {
+            background: #f9fafb;
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 1rem;
@@ -220,9 +207,9 @@
 </head>
 <body>
     <div class="header">
-        <h1>📄 {{ $filename }}</h1>
+        <h1>📄 {{ $title }}</h1>
         <div class="header-actions">
-            <a href="{{ $downloadUrl }}" class="btn btn-primary" download>
+            <a href="{{ route('attachments.view', ['filename' => $filename]) }}?download=1" class="btn btn-primary" download>
                 📥 Download
             </a>
             <button onclick="window.close()" class="btn btn-secondary">
@@ -233,8 +220,8 @@
 
     <div class="viewer-container">
         <div class="viewer-tabs">
-            <button class="tab-btn active" onclick="switchViewer('pdf')">
-                📄 PDF Viewer (Converted)
+            <button class="tab-btn active" onclick="switchViewer('iframe')">
+                📄 Direct View
             </button>
             <button class="tab-btn" onclick="switchViewer('microsoft')">
                 📝 Microsoft Office Online
@@ -244,49 +231,41 @@
             </button>
         </div>
 
-        <div class="viewer-content">
-            <!-- Loading indicator -->
-            <div id="loading" class="loading">
-                <div class="loading-spinner"></div>
-                <p>Loading document viewer...</p>
+        <!-- Loading indicator -->
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading document...</p>
+        </div>
+
+        <!-- Direct iframe viewer -->
+        <iframe id="iframe-viewer" class="viewer-iframe" style="display: none;"></iframe>
+
+        <!-- Microsoft Office Online Viewer -->
+        <iframe id="microsoft-viewer" class="viewer-iframe" style="display: none;"></iframe>
+
+        <!-- Fallback message -->
+        <div id="fallback" class="fallback-message" style="display: none;">
+            <h3>📄 Document Preview</h3>
+            <div class="error-message">
+                <strong>Note:</strong> This document cannot be displayed directly in the browser.
             </div>
-
-            <!-- PDF Viewer (Google Docs converts DOCX to PDF) -->
-            <iframe id="pdf-viewer" class="viewer-iframe" style="display: none;"></iframe>
-
-            <!-- Microsoft Office Online Viewer -->
-            <iframe id="microsoft-viewer" class="viewer-iframe" style="display: none;"></iframe>
-
-            <!-- Fallback message -->
-            <div id="fallback" class="fallback-message" style="display: none;">
-                <h3>📄 Document Preview</h3>
-                <div class="error-message">
-                    <strong>Note:</strong> Online document viewers may not work for files hosted on localhost or private networks.
-                </div>
-                <p>This DOCX document cannot be displayed directly in the browser using online viewers.</p>
-                <p><strong>Filename:</strong> {{ $filename }}</p>
-                <p><strong>File Size:</strong> {{ $fileSize ?? 'Unknown' }}</p>
-                <p><strong>Suggestions:</strong></p>
-                <ul style="text-align: left; margin-bottom: 2rem;">
-                    <li>Download the file to view it in Microsoft Word or Google Docs</li>
-                    <li>Upload the file to Google Drive or OneDrive for online viewing</li>
-                    <li>Use a desktop application that supports DOCX files</li>
-                </ul>
-                <a href="{{ $downloadUrl }}" class="btn btn-primary" download>
-                    📥 Download Document
-                </a>
-            </div>
+            <p><strong>Filename:</strong> {{ $filename }}</p>
+            <p><strong>Suggestions:</strong></p>
+            <ul style="text-align: left; margin-bottom: 2rem;">
+                <li>Download the file to view it in Microsoft Word or Google Docs</li>
+                <li>Upload the file to Google Drive or OneDrive for online viewing</li>
+                <li>Use a desktop application that supports DOCX files</li>
+            </ul>
+            <a href="{{ route('attachments.view', ['filename' => $filename]) }}?download=1" class="btn btn-primary" download>
+                📥 Download Document
+            </a>
         </div>
     </div>
 
     <script>
-        let currentViewer = 'pdf';
-        const fileUrl = '{{ $fileUrl }}';
-        const publicFileUrl = '{{ $publicFileUrl ?? $fileUrl }}';
-        
-        // Generate viewer URLs - Use Google Docs to convert DOCX to PDF for viewing
-        const googlePdfUrl = `https://docs.google.com/gview?url=${encodeURIComponent(publicFileUrl)}&embedded=true`;
-        const microsoftViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(publicFileUrl)}`;
+        const filename = '{{ $filename }}';
+        const streamUrl = '{{ route('attachments.streamDocx', ['filename' => $filename]) }}';
+        const microsoftViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(window.location.origin + streamUrl)}`;
 
         function switchViewer(viewer) {
             // Update tab buttons
@@ -294,15 +273,13 @@
             event.target.classList.add('active');
 
             // Hide all viewers
-            document.getElementById('pdf-viewer').style.display = 'none';
+            document.getElementById('iframe-viewer').style.display = 'none';
             document.getElementById('microsoft-viewer').style.display = 'none';
             document.getElementById('fallback').style.display = 'none';
             document.getElementById('loading').style.display = 'none';
 
-            currentViewer = viewer;
-
-            if (viewer === 'pdf') {
-                showPdfViewer();
+            if (viewer === 'iframe') {
+                showIframeViewer();
             } else if (viewer === 'microsoft') {
                 showMicrosoftViewer();
             } else if (viewer === 'download') {
@@ -310,15 +287,15 @@
             }
         }
 
-        function showPdfViewer() {
-            const iframe = document.getElementById('pdf-viewer');
+        function showIframeViewer() {
+            const iframe = document.getElementById('iframe-viewer');
             const loading = document.getElementById('loading');
             
             loading.style.display = 'flex';
-            loading.querySelector('p').textContent = 'Converting DOCX to PDF for viewing...';
+            loading.querySelector('p').textContent = 'Loading document...';
             
-            // Use Google Docs viewer which automatically converts DOCX to PDF for display
-            iframe.src = googlePdfUrl;
+            // Try to load the document directly in iframe
+            iframe.src = streamUrl;
             iframe.style.display = 'block';
             
             iframe.onload = function() {
@@ -334,8 +311,9 @@
             setTimeout(() => {
                 if (loading.style.display !== 'none') {
                     loading.style.display = 'none';
+                    showFallback();
                 }
-            }, 15000);
+            }, 10000);
         }
 
         function showMicrosoftViewer() {
@@ -361,6 +339,7 @@
             setTimeout(() => {
                 if (loading.style.display !== 'none') {
                     loading.style.display = 'none';
+                    showFallback();
                 }
             }, 15000);
         }
@@ -369,16 +348,9 @@
             document.getElementById('fallback').style.display = 'flex';
         }
 
-        // Initialize with local viewer for localhost
+        // Initialize with iframe viewer
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if we're on localhost
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                // Use Microsoft Office Online viewer with direct file URL
-                showMicrosoftViewer();
-            } else {
-                // Try PDF conversion viewer for public URLs
-                showPdfViewer();
-            }
+            showIframeViewer();
         });
 
         // Handle keyboard shortcuts
@@ -390,16 +362,7 @@
             // Ctrl+D or Cmd+D to download
             if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
                 e.preventDefault();
-                window.location.href = '{{ $downloadUrl }}';
-            }
-            // Tab switching
-            if (e.key === '1' && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                switchViewer('pdf');
-            }
-            if (e.key === '2' && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                switchViewer('microsoft');
+                window.location.href = '{{ route('attachments.view', ['filename' => $filename]) }}?download=1';
             }
         });
     </script>

@@ -11,7 +11,14 @@
     @php
         $filename = basename($file);
         $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-        $viewUrl = route('attachments.view', ['filename' => $filename]);
+        
+        // Use different view URL for DOCX files to open in viewer instead of downloading
+        if ($extension === 'docx') {
+            $viewUrl = route('attachments.docx-viewer', ['filename' => $filename]);
+        } else {
+            $viewUrl = route('attachments.view', ['filename' => $filename]);
+        }
+        
         $downloadUrl = route('activity.download', ['type' => $type, 'filename' => $filename]);
         
         // Set appropriate icon based on file type

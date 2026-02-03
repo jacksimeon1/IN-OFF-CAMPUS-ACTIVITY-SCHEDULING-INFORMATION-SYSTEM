@@ -178,7 +178,7 @@ class AttachmentController extends Controller
     }
 
     /**
-     * Show DOCX viewer page or convert to PDF
+     * Show DOCX viewer page
      */
     public function showDocxViewer($filename)
     {
@@ -199,12 +199,10 @@ class AttachmentController extends Controller
         ];
 
         $filePath = null;
-        $relativePath = null;
         foreach ($possiblePaths as $path) {
             $fullPath = Storage::disk('public')->path($path);
             if (file_exists($fullPath)) {
                 $filePath = $fullPath;
-                $relativePath = $path;
                 break;
             }
         }
@@ -213,31 +211,11 @@ class AttachmentController extends Controller
             abort(404, 'File not found');
         }
 
-        // Check if PDF version exists, if not try to convert
-        $pdfPath = $this->convertDocxToPdf($filePath, $decodedFilename);
-        
-        if ($pdfPath && file_exists($pdfPath)) {
-            // If PDF conversion successful, serve the PDF directly
-            $headers = [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="' . pathinfo($decodedFilename, PATHINFO_FILENAME) . '.pdf"',
-                'Cache-Control' => 'public, max-age=3600',
-            ];
-            
-            return response()->file($pdfPath, $headers);
-        }
-
-        // If conversion failed, fall back to the original DOCX viewer
         $fileSize = $this->formatFileSize(filesize($filePath));
-        $fileUrl = route('attachments.streamDocx', ['filename' => $filename]);
-        $downloadUrl = route('attachments.view', ['filename' => $filename]) . '?download=1';
-        $publicFileUrl = $this->getPublicFileUrl($filename);
 
-        return view('attachments.docx-viewer', [
+        return view('components.simple-docx-viewer', [
             'filename' => $decodedFilename,
-            'fileUrl' => $fileUrl,
-            'downloadUrl' => $downloadUrl,
-            'publicFileUrl' => $publicFileUrl,
+            'title' => 'Document Viewer',
             'fileSize' => $fileSize,
         ]);
     }
@@ -338,9 +316,10 @@ class AttachmentController extends Controller
      */
     private function getPublicFileUrl($filename)
     {
-        // For localhost/development, online viewers won't work
+        // For localhost/development, we can still try to use the stream URL
         if (request()->getHost() === 'localhost' || request()->getHost() === '127.0.0.1') {
-            return null;
+            // Use the stream URL which serves the file with proper headers
+            return route('attachments.streamDocx', ['filename' => $filename]);
         }
 
         // For production, generate the full public URL
