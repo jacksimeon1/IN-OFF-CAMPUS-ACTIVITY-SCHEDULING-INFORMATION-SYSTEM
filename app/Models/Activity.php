@@ -353,7 +353,7 @@ class Activity extends Model
 
         $daysBeforeActivity = now()->diffInDays($this->activity_date, false);
         $this->days_before_activity = $daysBeforeActivity;
-        $this->meets_deadline_requirement = $daysBeforeActivity >= 7;
+        $this->meets_deadline_requirement = $daysBeforeActivity >= 5;
 
         return $this->meets_deadline_requirement;
     }
@@ -465,7 +465,7 @@ class Activity extends Model
     {
         return static::where('location', $this->location)
             ->where('id', '!=', $this->id ?? 0)
-            ->whereIn('status', ['approved', 'recommended'])
+            ->where('workflow_status', 'approved_by_vp')
             ->where(function($query) {
                 // Check for date range overlaps
                 $query->where(function($q) {
@@ -495,7 +495,7 @@ class Activity extends Model
         // Check for exact time and venue conflicts
         $timeVenueConflicts = static::where('location', 'LIKE', '%' . trim($this->location) . '%')
             ->where('id', '!=', $this->id ?? 0)
-            ->whereIn('status', ['approved', 'recommended', 'pending'])
+            ->where('workflow_status', 'approved_by_vp')
             ->where(function($query) {
                 // Check for date range overlaps
                 $query->where(function($q) {

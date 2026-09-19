@@ -1714,7 +1714,6 @@ use App\Models\User;
                             <div class="icon-wrapper transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-green-200/50">
                                 <i class="fas fa-tasks text-white text-xl group-hover:animate-bounce"></i>
                             </div>
-                            <span class="text-2xl font-bold text-green-600 group-hover:scale-125 group-hover:text-green-700 transition-all duration-300 animate-pulse">{{ $stats['pending_activities'] }}</span>
                         </div>
                         <h4 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-green-700 transition-colors duration-300">Manage Activities</h4>
                         <p class="text-gray-600 text-sm mb-4 group-hover:text-gray-700">Review, approve, or reject submitted activities</p>
@@ -1734,7 +1733,6 @@ use App\Models\User;
                             <div class="icon-wrapper transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-green-200/50">
                                 <i class="fas fa-calendar-alt text-white text-xl group-hover:animate-bounce"></i>
                             </div>
-                            <span class="text-2xl font-bold text-green-600 group-hover:scale-125 group-hover:text-green-700 transition-all duration-300 animate-pulse">{{ $stats['approved_activities'] }}</span>
                         </div>
                         <h4 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-green-700 transition-colors duration-300">Activity Calendar</h4>
                         <p class="text-gray-600 text-sm mb-4 group-hover:text-gray-700">View scheduled and approved activities</p>
@@ -1754,7 +1752,6 @@ use App\Models\User;
                             <div class="icon-wrapper transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-green-200/50">
                                 <i class="fas fa-users-cog text-white text-xl group-hover:animate-bounce"></i>
                             </div>
-                            <span class="text-2xl font-bold text-green-600 group-hover:scale-125 group-hover:text-green-700 transition-all duration-300 animate-pulse">{{ $stats['total_users'] }}</span>
                         </div>
                         <h4 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-green-700 transition-colors duration-300">Edit Accounts</h4>
                         <p class="text-gray-600 text-sm mb-4 group-hover:text-gray-700">Manage user accounts and permissions</p>
@@ -1774,7 +1771,6 @@ use App\Models\User;
                             <div class="icon-wrapper transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-green-200/50">
                                 <i class="fas fa-chart-bar text-white text-xl group-hover:animate-bounce"></i>
                             </div>
-                            <span class="text-2xl font-bold text-green-600 group-hover:scale-125 group-hover:text-green-700 transition-all duration-300 animate-pulse">{{ $stats['total_activities'] }}</span>
                         </div>
                         <h4 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-green-700 transition-colors duration-300">Generate Reports</h4>
                         <p class="text-gray-600 text-sm mb-4 group-hover:text-gray-700">Create comprehensive reports on activities, users, and statistics</p>

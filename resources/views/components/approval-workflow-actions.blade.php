@@ -73,7 +73,7 @@
                         <div>
                             <h4 class="text-red-800 font-medium">Deadline Requirement Not Met</h4>
                             <p class="text-red-700 text-sm mt-1">
-                                Activities must be submitted at least 7 days before the scheduled date.
+                                Activities must be submitted at least 5 days before the scheduled date.
                                 Your activity is scheduled for {{ $activity->activity_date->format('M d, Y') }}
                                 ({{ $activity->days_before_activity }} days from now).
                             </p>

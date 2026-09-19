@@ -120,7 +120,7 @@
                                 <i class="fas fa-info-circle text-yellow-600 mr-2 mt-0.5"></i>
                                 <div>
                                     <p class="text-sm text-yellow-800 font-medium">
-                                        Submission deadline: submit at least <strong>7 days</strong> before your activity start date.
+                                        Submission deadline: submit at least <strong>5 days</strong> before your activity start date.
                                     </p>
                                     <p id="deadline-detail" class="text-xs text-yellow-700 mt-1">
                                         Select a start date to check if the requirement is met.
@@ -651,15 +651,15 @@
         const diffMs = start.getTime() - today.getTime();
         const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-        if (days >= 7) {
+        if (days >= 5) {
             noticeEl.querySelector('div').className = 'bg-green-50 border border-green-200 rounded-lg p-3 flex items-start';
             detailEl.className = 'text-xs text-green-700 mt-1';
             detailEl.innerHTML = `<span class="text-green-800 font-semibold"><i class="fas fa-check-circle mr-1"></i> Requirement met.</span> ${days} day(s) before the scheduled date (${val}).`;
         } else {
-            const daysShort = Math.max(0, 7 - days);
+            const daysShort = Math.max(0, 5 - days);
             noticeEl.querySelector('div').className = 'bg-red-50 border border-red-200 rounded-lg p-3 flex items-start';
             detailEl.className = 'text-xs text-red-700 mt-1';
-            detailEl.innerHTML = `<span class="text-red-800 font-semibold"><i class=\"fas fa-exclamation-triangle mr-1\"></i> Requirement not met.</span> Only ${days} day(s) before the scheduled date (${val}). Submit at least 7 days prior.`;
+            detailEl.innerHTML = `<span class="text-red-800 font-semibold"><i class=\"fas fa-exclamation-triangle mr-1\"></i> Requirement not met.</span> Only ${days} day(s) before the scheduled date (${val}). Submit at least 5 days prior.`;
         }
     }
 

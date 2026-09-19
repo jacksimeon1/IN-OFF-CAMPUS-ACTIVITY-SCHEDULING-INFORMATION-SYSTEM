@@ -17,6 +17,15 @@
                     {{ $activity->getCurrentApprovalStepName() }}
                 </span>
             </div>
+            <div class="mt-2">
+                <p class="text-xs text-gray-500">
+                    <i class="fas fa-clock mr-1"></i>
+                    Submitted: {{ $activity->created_at->format('M d, Y g:i A') }}
+                    @if($activity->updated_at && $activity->updated_at != $activity->created_at)
+                        | Last Updated: {{ $activity->updated_at->format('M d, Y g:i A') }}
+                    @endif
+                </p>
+            </div>
         </div>
 
         <!-- Deadline Requirement Notice (visible to all roles) -->
@@ -28,7 +37,7 @@
                         <div>
                             <h4 class="text-red-800 font-medium">Deadline Requirement Not Met</h4>
                             <p class="text-red-700 text-sm mt-1">
-                                Activities must be submitted at least 7 days before the scheduled date.
+                                Activities must be submitted at least 5 days before the scheduled date.
                                 This activity is scheduled for {{ $activity->activity_date->format('M d, Y') }}
                                 ({{ $activity->days_before_activity }} days from now).
                             </p>
@@ -63,6 +72,10 @@
                             <div class="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
                                 <i class="fas fa-check text-white text-xs"></i>
                             </div>
+                        @elseif($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+                            <div class="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-white text-xs"></i>
+                            </div>
                         @elseif($activity->workflow_status === 'draft')
                             <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
                                 <span class="text-white text-xs font-bold">1</span>
@@ -75,6 +88,11 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm text-gray-900">Noted by Adviser</p>
+                        @if($activity->adviser_noted_at)
+                            <p class="text-xs text-gray-500">{{ $activity->adviser_noted_at->format('M d, Y g:i A') }}</p>
+                        @elseif($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+                            <p class="text-xs text-gray-400">Skipped - Admin approved</p>
+                        @endif
                     </div>
                 </div>
 
@@ -84,6 +102,10 @@
                         @if($activity->dean_noted_at)
                             <div class="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
                                 <i class="fas fa-check text-white text-xs"></i>
+                            </div>
+                        @elseif($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+                            <div class="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-white text-xs"></i>
                             </div>
                         @elseif($activity->workflow_status === 'noted_by_adviser')
                             <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
@@ -97,6 +119,11 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm text-gray-900">Noted by Dean/Unit Head</p>
+                        @if($activity->dean_noted_at)
+                            <p class="text-xs text-gray-500">{{ $activity->dean_noted_at->format('M d, Y g:i A') }}</p>
+                        @elseif($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+                            <p class="text-xs text-gray-400">Skipped - Admin approved</p>
+                        @endif
                     </div>
                 </div>
 
@@ -106,6 +133,10 @@
                         @if($activity->psg_reviewed_at)
                             <div class="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
                                 <i class="fas fa-check text-white text-xs"></i>
+                            </div>
+                        @elseif($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+                            <div class="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-white text-xs"></i>
                             </div>
                         @elseif($activity->workflow_status === 'noted_by_dean')
                             <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
@@ -119,6 +150,11 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm text-gray-900">Reviewed by PSG Council Adviser</p>
+                        @if($activity->psg_reviewed_at)
+                            <p class="text-xs text-gray-500">{{ $activity->psg_reviewed_at->format('M d, Y g:i A') }}</p>
+                        @elseif($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+                            <p class="text-xs text-gray-400">Skipped - Admin approved</p>
+                        @endif
                     </div>
                 </div>
 
@@ -128,6 +164,10 @@
                         @if($activity->director_endorsed_at)
                             <div class="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
                                 <i class="fas fa-check text-white text-xs"></i>
+                            </div>
+                        @elseif($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+                            <div class="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-white text-xs"></i>
                             </div>
                         @elseif($activity->workflow_status === 'reviewed_by_psg')
                             <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
@@ -141,6 +181,11 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm text-gray-900">Endorsed by Director, Student Affairs</p>
+                        @if($activity->director_endorsed_at)
+                            <p class="text-xs text-gray-500">{{ $activity->director_endorsed_at->format('M d, Y g:i A') }}</p>
+                        @elseif($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+                            <p class="text-xs text-gray-400">Skipped - Admin approved</p>
+                        @endif
                     </div>
                 </div>
 
@@ -150,6 +195,10 @@
                         @if($activity->vp_approved_at)
                             <div class="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
                                 <i class="fas fa-check text-white text-xs"></i>
+                            </div>
+                        @elseif($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+                            <div class="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-white text-xs"></i>
                             </div>
                         @elseif($activity->workflow_status === 'endorsed_by_director')
                             <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
@@ -163,10 +212,50 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm text-gray-900">Approved by VP for Academics</p>
+                        @if($activity->vp_approved_at)
+                            <p class="text-xs text-gray-500">{{ $activity->vp_approved_at->format('M d, Y g:i A') }}</p>
+                        @elseif($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+                            <p class="text-xs text-gray-400">Skipped - Admin approved</p>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Admin Status Change (only shown when admin changes status) -->
+        @if($activity->status === 'approved' && $activity->workflow_status !== 'approved_by_vp')
+            <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-shield text-white text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-900">Approved by Administrator</p>
+                        @if($activity->updated_at)
+                            <p class="text-xs text-gray-500">{{ $activity->updated_at->format('M d, Y g:i A') }}</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @elseif($activity->status === 'rejected' && $activity->workflow_status !== 'rejected')
+            <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-shield text-white text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-900">Rejected by Administrator</p>
+                        @if($activity->updated_at)
+                            <p class="text-xs text-gray-500">{{ $activity->updated_at->format('M d, Y g:i A') }}</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
 
 
 

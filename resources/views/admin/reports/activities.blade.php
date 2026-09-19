@@ -197,6 +197,7 @@
                                 <select name="format" class="form-input" required>
                                     <option value="preview">Preview (Web)</option>
                                     <option value="pdf">PDF Download</option>
+                                    <option value="docx">Word/DOCX Download</option>
                                     <option value="excel">Excel Download</option>
                                 </select>
                             </div>
@@ -249,8 +250,13 @@ document.addEventListener('DOMContentLoaded', function() {
             data.activity_types.forEach(type => {
                 if (type) {
                     const option = document.createElement('option');
-                    option.value = type;
-                    option.textContent = type;
+                    if (typeof type === 'object') {
+                        option.value = type.id;
+                        option.textContent = type.name;
+                    } else {
+                        option.value = type;
+                        option.textContent = type;
+                    }
                     typeSelect.appendChild(option);
                 }
             });

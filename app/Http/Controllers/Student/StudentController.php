@@ -74,7 +74,7 @@ class StudentController extends Controller
 
     public function updatePassword(Request $request)
     {
-        $request->validate([
+        $request->validateWithBag('updatePassword', [
             'current_password' => ['required', 'current_password'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
@@ -137,7 +137,7 @@ class StudentController extends Controller
             abort(403, 'Access denied.');
         }
 
-        return view('student.show-activity', compact('activity'));
+        return view('activities.show', compact('activity'));
     }
 
     public function editActivity(Activity $activity)

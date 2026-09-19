@@ -164,8 +164,8 @@ class ApprovalController extends Controller
 
         // Check if activity is too close to submission date
         $daysDifference = now()->diffInDays($activity->activity_date);
-        if ($daysDifference < 7) {
-            $warnings[] = 'Activity is scheduled less than a week from now.';
+        if ($daysDifference < 5) {
+            $warnings[] = 'Activity is scheduled less than 5 days from now.';
         }
 
         return response()->json([

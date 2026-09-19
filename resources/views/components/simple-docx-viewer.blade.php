@@ -220,14 +220,17 @@
 
     <div class="viewer-container">
         <div class="viewer-tabs">
-            <button class="tab-btn active" onclick="switchViewer('iframe')">
+            <button class="tab-btn active" onclick="switchViewer('direct')">
                 📄 Direct View
+            </button>
+            <button class="tab-btn" onclick="switchViewer('iframe')">
+                📄 Google Docs Viewer
             </button>
             <button class="tab-btn" onclick="switchViewer('microsoft')">
                 📝 Microsoft Office Online
             </button>
             <button class="tab-btn" onclick="switchViewer('download')">
-                📥 Download Only
+                📥 Download Options
             </button>
         </div>
 
@@ -238,6 +241,9 @@
         </div>
 
         <!-- Direct iframe viewer -->
+        <iframe id="direct-viewer" class="viewer-iframe" style="display: none;"></iframe>
+
+        <!-- Google Docs viewer -->
         <iframe id="iframe-viewer" class="viewer-iframe" style="display: none;"></iframe>
 
         <!-- Microsoft Office Online Viewer -->
@@ -247,25 +253,52 @@
         <div id="fallback" class="fallback-message" style="display: none;">
             <h3>📄 Document Preview</h3>
             <div class="error-message">
-                <strong>Note:</strong> This document cannot be displayed directly in the browser.
+                <strong>Note:</strong> Online document viewers cannot access files hosted on localhost for security reasons.
             </div>
             <p><strong>Filename:</strong> {{ $filename }}</p>
-            <p><strong>Suggestions:</strong></p>
+            <p><strong>File Size:</strong> {{ $fileSize ?? 'Unknown' }}</p>
+            <p><strong>Why this happens:</strong></p>
             <ul style="text-align: left; margin-bottom: 2rem;">
-                <li>Download the file to view it in Microsoft Word or Google Docs</li>
-                <li>Upload the file to Google Drive or OneDrive for online viewing</li>
-                <li>Use a desktop application that supports DOCX files</li>
+                <li>Google Docs and Microsoft Office Online require publicly accessible URLs</li>
+                <li>Localhost URLs (127.0.0.1) are not accessible from external services</li>
+                <li>This is a security feature to protect your local files</li>
             </ul>
-            <a href="{{ route('attachments.view', ['filename' => $filename]) }}?download=1" class="btn btn-primary" download>
-                📥 Download Document
-            </a>
+            <p><strong>Solutions:</strong></p>
+            <ul style="text-align: left; margin-bottom: 2rem;">
+                <li><strong>Download</strong> the file and open it in Microsoft Word or Google Docs</li>
+                <li><strong>Upload</strong> the file to Google Drive or OneDrive for online viewing</li>
+                <li><strong>Deploy</strong> your application to a public server for online viewing</li>
+                <li><strong>Use</strong> a desktop application that supports DOCX files</li>
+            </ul>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="{{ route('attachments.view', ['filename' => $filename]) }}?download=1" class="btn btn-primary" download>
+                    📥 Download Document
+                </a>
+                <a href="{{ route('attachments.streamDocx', ['filename' => $filename]) }}" class="btn btn-secondary" target="_blank">
+                    🌐 Open in New Tab
+                </a>
+            </div>
         </div>
     </div>
 
     <script>
         const filename = '{{ $filename }}';
         const streamUrl = '{{ route('attachments.streamDocx', ['filename' => $filename]) }}';
-        const microsoftViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(window.location.origin + streamUrl)}`;
+        const fullStreamUrl = window.location.origin + streamUrl;
+        
+        // For localhost, create a data URL approach or use direct embedding
+        let googleViewerUrl, microsoftViewerUrl;
+        
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // For localhost, online viewers won't work with private URLs
+            // We'll show a message explaining this and provide download option
+            googleViewerUrl = null;
+            microsoftViewerUrl = null;
+        } else {
+            // For production, use the online viewers
+            googleViewerUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(fullStreamUrl)}`;
+            microsoftViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fullStreamUrl)}`;
+        }
 
         function switchViewer(viewer) {
             // Update tab buttons
@@ -273,29 +306,98 @@
             event.target.classList.add('active');
 
             // Hide all viewers
+            document.getElementById('direct-viewer').style.display = 'none';
             document.getElementById('iframe-viewer').style.display = 'none';
             document.getElementById('microsoft-viewer').style.display = 'none';
             document.getElementById('fallback').style.display = 'none';
             document.getElementById('loading').style.display = 'none';
 
-            if (viewer === 'iframe') {
-                showIframeViewer();
+            if (viewer === 'direct') {
+                showDirectViewer();
+            } else if (viewer === 'iframe') {
+                if (googleViewerUrl) {
+                    showGoogleViewer();
+                } else {
+                    showLocalhostMessage();
+                }
             } else if (viewer === 'microsoft') {
-                showMicrosoftViewer();
+                if (microsoftViewerUrl) {
+                    showMicrosoftViewer();
+                } else {
+                    showLocalhostMessage();
+                }
             } else if (viewer === 'download') {
                 showFallback();
             }
         }
 
-        function showIframeViewer() {
+        function showDirectViewer() {
+            const iframe = document.getElementById('direct-viewer');
+            const loading = document.getElementById('loading');
+            
+            loading.style.display = 'flex';
+            loading.querySelector('p').textContent = 'Loading document directly...';
+            
+            // Try to load the DOCX file directly in iframe
+            iframe.src = streamUrl;
+            iframe.style.display = 'block';
+            
+            iframe.onload = function() {
+                loading.style.display = 'none';
+                // Check if content loaded successfully
+                try {
+                    if (iframe.contentDocument && iframe.contentDocument.body.innerHTML.trim() !== '') {
+                        // Content loaded successfully
+                        console.log('Direct view successful');
+                    } else {
+                        // Fallback to other options
+                        loading.style.display = 'flex';
+                        loading.querySelector('p').textContent = 'Direct view not supported, trying alternatives...';
+                        setTimeout(() => {
+                            loading.style.display = 'none';
+                            showFallback();
+                        }, 2000);
+                    }
+                } catch (e) {
+                    // Cross-origin error, fallback to download
+                    loading.style.display = 'none';
+                    showFallback();
+                }
+            };
+            
+            iframe.onerror = function() {
+                loading.style.display = 'none';
+                showFallback();
+            };
+
+            // Timeout fallback
+            setTimeout(() => {
+                if (loading.style.display !== 'none') {
+                    loading.style.display = 'none';
+                    showFallback();
+                }
+            }, 10000);
+        }
+
+        function showLocalhostMessage() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'flex';
+            loading.querySelector('p').textContent = 'Online viewers cannot access localhost files...';
+            
+            setTimeout(() => {
+                loading.style.display = 'none';
+                showFallback();
+            }, 2000);
+        }
+
+        function showGoogleViewer() {
             const iframe = document.getElementById('iframe-viewer');
             const loading = document.getElementById('loading');
             
             loading.style.display = 'flex';
-            loading.querySelector('p').textContent = 'Loading document...';
+            loading.querySelector('p').textContent = 'Loading Google Docs viewer...';
             
-            // Try to load the document directly in iframe
-            iframe.src = streamUrl;
+            iframe.src = googleViewerUrl;
             iframe.style.display = 'block';
             
             iframe.onload = function() {
@@ -304,16 +406,21 @@
             
             iframe.onerror = function() {
                 loading.style.display = 'none';
-                showFallback();
+                showMicrosoftViewer();
             };
 
-            // Fallback timeout
             setTimeout(() => {
                 if (loading.style.display !== 'none') {
                     loading.style.display = 'none';
-                    showFallback();
+                    setTimeout(() => {
+                        if (iframe.contentDocument && iframe.contentDocument.body.innerHTML.trim() !== '') {
+                            // Content loaded successfully
+                        } else {
+                            showMicrosoftViewer();
+                        }
+                    }, 5000);
                 }
-            }, 10000);
+            }, 15000);
         }
 
         function showMicrosoftViewer() {
@@ -335,22 +442,30 @@
                 showFallback();
             };
 
-            // Fallback timeout
             setTimeout(() => {
                 if (loading.style.display !== 'none') {
                     loading.style.display = 'none';
                     showFallback();
                 }
-            }, 15000);
+            }, 20000);
         }
 
         function showFallback() {
             document.getElementById('fallback').style.display = 'flex';
         }
 
-        // Initialize with iframe viewer
+        // Initialize based on environment
         document.addEventListener('DOMContentLoaded', function() {
-            showIframeViewer();
+            // Hide loading immediately
+            document.getElementById('loading').style.display = 'none';
+            
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                // For localhost, try direct view first
+                showDirectViewer();
+            } else {
+                // For production, try Google Docs viewer first
+                showGoogleViewer();
+            }
         });
 
         // Handle keyboard shortcuts

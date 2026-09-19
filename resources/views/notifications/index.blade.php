@@ -67,7 +67,27 @@
                                             {{ $notification->created_at->diffForHumans() }}
                                         </span>
                                         @if($notification->activity)
-                                            <a href="{{ route('activities.show', $notification->activity) }}" 
+                                            @php
+                                                $role = auth()->user()->role;
+                                                $routePrefix = '';
+                                                
+                                                if ($role === 'student_officer') {
+                                                    $routePrefix = 'student.';
+                                                } elseif ($role === 'psg_adviser') {
+                                                    $routePrefix = 'psg.';
+                                                } elseif ($role === 'admin') {
+                                                    $routePrefix = '';
+                                                } else {
+                                                    $routePrefix = $role . '.';
+                                                }
+                                                
+                                                if ($role === 'admin') {
+                                                    $actionUrl = route('activities.show', $notification->activity);
+                                                } else {
+                                                    $actionUrl = route($routePrefix . 'show-activity', $notification->activity);
+                                                }
+                                            @endphp
+                                            <a href="{{ $actionUrl }}" 
                                                class="text-sm text-green-600 hover:text-green-700 font-medium">
                                                 <i class="fas fa-external-link-alt mr-1"></i>
                                                 View Activity

@@ -9,6 +9,33 @@ use Symfony\Component\HttpFoundation\Response;
 class AttachmentController extends Controller
 {
     /**
+     * View PDF files (including converted DOCX files)
+     */
+    public function viewPdf($filename)
+    {
+        // URL decode the filename to handle spaces and special characters
+        $decodedFilename = urldecode($filename);
+        
+        // Look for PDF files in the pdf_cache directory
+        $pdfPath = Storage::disk('public')->path('pdf_cache/' . $decodedFilename);
+        
+        if (!file_exists($pdfPath)) {
+            abort(404, 'PDF file not found');
+        }
+
+        $headers = [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $decodedFilename . '"',
+            'Cache-Control' => 'public, max-age=3600',
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Content-Type, Authorization'
+        ];
+
+        return response()->file($pdfPath, $headers);
+    }
+
+    /**
      * View any file type (PDF, DOCX, etc.) in the browser
      */
     public function view($filename, Request $request = null)
@@ -213,7 +240,8 @@ class AttachmentController extends Controller
 
         $fileSize = $this->formatFileSize(filesize($filePath));
 
-        return view('components.simple-docx-viewer', [
+        // Use the Mammoth.js-based DOCX viewer
+        return view('components.mammoth-docx-viewer', [
             'filename' => $decodedFilename,
             'title' => 'Document Viewer',
             'fileSize' => $fileSize,
@@ -221,12 +249,18 @@ class AttachmentController extends Controller
     }
 
     /**
-     * Convert DOCX to PDF using LibreOffice (if available)
+     * Convert DOCX to PDF using PHPWord and DomPDF
      */
     private function convertDocxToPdf($docxPath, $filename)
     {
         try {
-            // Create PDF directory if it doesn't exist
+            // Check if required extensions are available
+            if (!class_exists('ZipArchive')) {
+                \Log::error('ZipArchive class not found - PHP Zip extension is required for DOCX processing');
+                return null;
+            }
+
+            // Create PDF cache directory if it doesn't exist
             $pdfDir = Storage::disk('public')->path('pdf_cache');
             if (!file_exists($pdfDir)) {
                 mkdir($pdfDir, 0755, true);
@@ -241,29 +275,17 @@ class AttachmentController extends Controller
                 return $pdfPath;
             }
 
-            // Try to convert using LibreOffice (if available)
-            $libreOfficePath = $this->findLibreOffice();
-            if ($libreOfficePath) {
-                $command = sprintf(
-                    '"%s" --headless --convert-to pdf --outdir "%s" "%s" 2>&1',
-                    $libreOfficePath,
-                    $pdfDir,
-                    $docxPath
-                );
-
-                $output = [];
-                $returnCode = 0;
-                exec($command, $output, $returnCode);
-
-                if ($returnCode === 0 && file_exists($pdfPath)) {
-                    return $pdfPath;
+            // Use the DocxToPdfConverter service
+            if (class_exists('App\Services\DocxToPdfConverter')) {
+                $convertedPath = \App\Services\DocxToPdfConverter::convert($docxPath, $pdfPath);
+                if ($convertedPath && file_exists($convertedPath)) {
+                    return $convertedPath;
                 }
             }
 
-            // If LibreOffice conversion failed, try online conversion service
-            return $this->convertDocxToPdfOnline($docxPath, $pdfPath);
+            return null;
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             \Log::error('DOCX to PDF conversion failed: ' . $e->getMessage());
             return null;
         }

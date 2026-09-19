@@ -125,13 +125,8 @@ class NotificationService
      */
     public function notifyOwnerResubmitted(Activity $activity, ?User $rejector): void
     {
-        $target = $rejector ? ($rejector->name . ' (' . $rejector->getRoleDisplayName() . ')') : $this->getNextApproverRoleName($activity);
         $message = "Your activity '{$activity->title}' has been resubmitted successfully.";
-        if ($rejector) {
-            $message .= "\n\nNext step: Review by {$target}";
-        } else {
-            $message .= "\n\nNext step: " . $this->getNextApproverRoleName($activity);
-        }
+        $message .= "\n\nNext step: Adviser Review";
 
         $this->createNotification(
             $activity->user,

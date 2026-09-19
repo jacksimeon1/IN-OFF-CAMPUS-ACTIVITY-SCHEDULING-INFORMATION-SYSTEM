@@ -24,7 +24,7 @@ class ApprovalWorkflowController extends Controller
         // Check deadline requirement
         if (!$activity->checkDeadlineRequirement()) {
             return back()->withErrors([
-                'deadline' => 'Activity must be submitted at least 7 days before the scheduled date.'
+                'deadline' => 'Activity must be submitted at least 5 days before the scheduled date.'
             ]);
         }
 
@@ -171,7 +171,7 @@ class ApprovalWorkflowController extends Controller
 
             case 'reviewed_by_psg':
                 // Notify director
-                $director = \App\Models\User::where('role', 'director_student_affairs')->first();
+                $director = \App\Models\User::where('role', 'director')->where('is_active', true)->first();
                 if ($director) {
                     $notifications[] = [
                         'user_id' => $director->id,
@@ -183,7 +183,7 @@ class ApprovalWorkflowController extends Controller
 
             case 'endorsed_by_director':
                 // Notify VP
-                $vp = \App\Models\User::where('role', 'vp_academics')->first();
+                $vp = \App\Models\User::where('role', 'vp')->where('is_active', true)->first();
                 if ($vp) {
                     $notifications[] = [
                         'user_id' => $vp->id,

@@ -32,7 +32,6 @@ class UsersReportExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function headings(): array
     {
         return [
-            'ID',
             'Name',
             'Email',
             'Role',
@@ -41,7 +40,6 @@ class UsersReportExport implements FromCollection, WithHeadings, WithMapping, Wi
             'Total Activities',
             'Approved Activities',
             'Pending Activities',
-            'Registration Date',
             'Last Login',
             'Email Verified'
         ];
@@ -58,7 +56,6 @@ class UsersReportExport implements FromCollection, WithHeadings, WithMapping, Wi
         $pendingActivities = $user->activities->where('workflow_status', 'pending')->count();
 
         return [
-            $user->id,
             $user->name,
             $user->email,
             $user->role === 'student' ? 'Student Officer' : ucfirst($user->role),
@@ -67,7 +64,6 @@ class UsersReportExport implements FromCollection, WithHeadings, WithMapping, Wi
             $totalActivities,
             $approvedActivities,
             $pendingActivities,
-            $user->created_at->format('Y-m-d'),
             $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i') : 'Never',
             $user->email_verified_at ? 'Yes' : 'No',
         ];

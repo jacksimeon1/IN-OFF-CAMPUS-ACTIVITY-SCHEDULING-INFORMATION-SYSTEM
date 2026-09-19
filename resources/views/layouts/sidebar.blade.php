@@ -35,6 +35,10 @@
                 --sidebar-text-muted: #e2e8f0;
             }
 
+            html {
+                font-size: 13px !important; 
+            }
+
             /* Sidebar Styles - Based on Audi Design */
             .sidebar {
                 background-color: var(--sidebar-bg);
@@ -310,7 +314,7 @@
 
             /* Additional Comprehensive Responsive Scaling */
             @media (max-width: 768px) {
-                body { zoom: 0.8; }
+                body { zoom: 0.6; }
 
                 /* Ensure content scrolls horizontally */
                 .main-content,
@@ -322,19 +326,19 @@
             }
 
             @media (max-width: 576px) {
-                body { zoom: 0.75; }
+                body { zoom: 0.55; }
             }
 
             @media (max-width: 480px) {
-                body { zoom: 0.7; }
+                body { zoom: 0.5; }
             }
 
             @media (max-width: 360px) {
-                body { zoom: 0.65; }
+                body { zoom: 0.45; }
             }
 
             @media (max-width: 320px) {
-                body { zoom: 0.6; }
+                body { zoom: 0.4; }
             }
 
             /* Preserve interactive elements */
@@ -502,6 +506,10 @@
 
                         <div class="nav-section">
                             <div class="nav-section-title">Tools</div>
+                            <a href="{{ route('my-approvals.index') }}" class="nav-item {{ request()->routeIs('my-approvals.*') ? 'active' : '' }}" id="nav-adviser-my-approvals">
+                                <i class="fas fa-check-double"></i>
+                                <span>My Approvals</span>
+                            </a>
                             <a href="{{ route('adviser.profile') }}" class="nav-item {{ request()->routeIs('adviser.profile') ? 'active' : '' }}" id="nav-adviser-profile">
                                 <i class="fas fa-user-cog"></i>
                                 <span>Profile Settings</span>
@@ -524,6 +532,10 @@
 
                         <div class="nav-section">
                             <div class="nav-section-title">Tools</div>
+                            <a href="{{ route('my-approvals.index') }}" class="nav-item {{ request()->routeIs('my-approvals.*') ? 'active' : '' }}" id="nav-dean-my-approvals">
+                                <i class="fas fa-check-double"></i>
+                                <span>My Approvals</span>
+                            </a>
                             <a href="{{ route('dean.profile') }}" class="nav-item {{ request()->routeIs('dean.profile') ? 'active' : '' }}" id="nav-dean-profile">
                                 <i class="fas fa-user-cog"></i>
                                 <span>Profile Settings</span>
@@ -546,6 +558,10 @@
 
                         <div class="nav-section">
                             <div class="nav-section-title">Tools</div>
+                            <a href="{{ route('my-approvals.index') }}" class="nav-item {{ request()->routeIs('my-approvals.*') ? 'active' : '' }}" id="nav-psg-my-approvals">
+                                <i class="fas fa-check-double"></i>
+                                <span>My Approvals</span>
+                            </a>
                             <a href="{{ route('psg.profile') }}" class="nav-item {{ request()->routeIs('psg.profile') ? 'active' : '' }}" id="nav-psg-profile">
                                 <i class="fas fa-user-cog"></i>
                                 <span>Profile Settings</span>
@@ -569,6 +585,10 @@
 
                         <div class="nav-section">
                             <div class="nav-section-title">Tools</div>
+                            <a href="{{ route('my-approvals.index') }}" class="nav-item {{ request()->routeIs('my-approvals.*') ? 'active' : '' }}" id="nav-director-my-approvals">
+                                <i class="fas fa-check-double"></i>
+                                <span>My Approvals</span>
+                            </a>
                             <a href="{{ route('director.profile') }}" class="nav-item {{ request()->routeIs('director.profile') ? 'active' : '' }}" id="nav-director-profile">
                                 <i class="fas fa-user-cog"></i>
                                 <span>Profile Settings</span>
@@ -592,6 +612,10 @@
 
                         <div class="nav-section">
                             <div class="nav-section-title">Tools</div>
+                            <a href="{{ route('my-approvals.index') }}" class="nav-item {{ request()->routeIs('my-approvals.*') ? 'active' : '' }}" id="nav-vp-my-approvals">
+                                <i class="fas fa-check-double"></i>
+                                <span>My Approvals</span>
+                            </a>
                             <a href="{{ route('vp.profile') }}" class="nav-item {{ request()->routeIs('vp.profile') ? 'active' : '' }}" id="nav-vp-profile">
                                 <i class="fas fa-user-cog"></i>
                                 <span>Profile Settings</span>

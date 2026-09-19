@@ -44,6 +44,10 @@
             --admin-sidebar-hover: #eab308;
         }
 
+        html {
+            font-size: 13px !important; 
+        }
+
         body {
             font-family: 'Figtree', sans-serif;
             background-color: var(--admin-bg);

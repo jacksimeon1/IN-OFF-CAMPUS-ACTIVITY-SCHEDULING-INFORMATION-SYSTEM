@@ -90,14 +90,8 @@ class ActivityController extends Controller
             // Date ranges overlap if NOT (existing.end_date < new.start_date OR existing.start_date > new.end_date)
             // Time ranges overlap if (existing.start_time < new.end_time AND existing.end_time > new.start_time)
             $conflicts = Activity::query()
-                // Consider only activities that are active in the workflow or overall status
-                ->where(function ($q) {
-                    $q->whereIn('status', ['approved', 'recommended', 'pending'])
-                      ->orWhereIn('workflow_status', [
-                          'submitted_to_adviser', 'reviewed_by_adviser', 'reviewed_by_dean',
-                          'endorsed_by_director', 'approved_by_vp', 'submitted_to_osa', 'pending', 'draft'
-                      ]);
-                })
+                // Only check against fully approved activities
+                ->where('workflow_status', 'approved_by_vp')
                 // Location match: case-insensitive equality or partial match
                 ->where(function ($q) use ($location) {
                     $q->whereRaw('LOWER(location) = ?', [mb_strtolower($location)])
@@ -143,13 +137,8 @@ class ActivityController extends Controller
                 // Helper closure to check availability of a proposed slot
                 $isAvailable = function (string $sDate, string $eDate, string $sTime, string $eTime, string $loc): bool {
                     $existing = Activity::query()
-                        ->where(function ($q) {
-                            $q->whereIn('status', ['approved', 'recommended', 'pending'])
-                              ->orWhereIn('workflow_status', [
-                                  'submitted_to_adviser', 'reviewed_by_adviser', 'reviewed_by_dean',
-                                  'endorsed_by_director', 'approved_by_vp', 'submitted_to_osa', 'pending', 'draft'
-                              ]);
-                        })
+                        // Only check against fully approved activities
+                        ->where('workflow_status', 'approved_by_vp')
                         ->where(function ($q) use ($loc) {
                             $q->whereRaw('LOWER(location) = ?', [mb_strtolower($loc)])
                               ->orWhere('location', 'LIKE', '%' . $loc . '%');
@@ -532,32 +521,8 @@ class ActivityController extends Controller
             // Capture rejector before clearing fields
             $rejector = $activity->rejectedBy; // relation to User
 
-            // Map rejector role to the appropriate checkpoint so the next approver equals the rejector role
-            $targetCheckpoint = 'draft';
-            if ($rejector) {
-                switch ($rejector->role) {
-                    case 'adviser':
-                        $targetCheckpoint = 'draft';
-                        break;
-                    case 'dean':
-                        $targetCheckpoint = 'noted_by_adviser';
-                        break;
-                    case 'psg_adviser':
-                        $targetCheckpoint = 'noted_by_dean';
-                        break;
-                    case 'director':
-                        $targetCheckpoint = 'reviewed_by_psg';
-                        break;
-                    case 'vp':
-                        $targetCheckpoint = 'endorsed_by_director';
-                        break;
-                    default:
-                        $targetCheckpoint = 'draft';
-                }
-            }
-
-            // Set workflow to checkpoint just before the rejecting role
-            $activity->workflow_status = $targetCheckpoint;
+            // Always reset to first step (draft) on resubmission
+            $activity->workflow_status = 'draft';
 
             // Legacy overall status reset (must not be null due to DB constraint)
             $activity->status = 'pending';
@@ -565,10 +530,27 @@ class ActivityController extends Controller
             $activity->submitted_at = now();
             $activity->checkDeadlineRequirement();
 
-            // Now clear rejection metadata (after we've used it)
+            // Clear rejection metadata
             $activity->rejected_by = null;
             $activity->rejected_at = null;
             $activity->rejection_reason = null;
+
+            // Clear all intermediate approval fields so workflow restarts from scratch
+            $activity->adviser_noted_by = null;
+            $activity->adviser_noted_at = null;
+            $activity->adviser_notes = null;
+            $activity->dean_noted_by = null;
+            $activity->dean_noted_at = null;
+            $activity->dean_notes = null;
+            $activity->psg_reviewed_by = null;
+            $activity->psg_reviewed_at = null;
+            $activity->psg_review_comments = null;
+            $activity->director_endorsed_by = null;
+            $activity->director_endorsed_at = null;
+            $activity->director_endorsement_comments = null;
+            $activity->vp_approved_by = null;
+            $activity->vp_approved_at = null;
+            $activity->vp_approval_comments = null;
 
             $activity->save();
 
@@ -578,23 +560,14 @@ class ActivityController extends Controller
                 'user_id' => Auth::id(),
                 'action' => 'resubmitted',
                 'previous_status' => 'rejected',
-                'new_status' => $targetCheckpoint,
-                'comments' => $rejector ? ('Resubmitted to ' . ucfirst(str_replace('_', ' ', $rejector->role))) : 'Resubmitted for next approval step',
+                'new_status' => 'draft',
+                'comments' => 'Resubmitted — approval workflow reset to first step',
             ]);
 
-            // Notify the rejector directly if available; otherwise notify next approver per workflow
-            if ($rejector && $rejector->is_active) {
-                $this->notificationService->notifyResubmissionToRejector($activity, $rejector);
-            } else {
-                $this->notificationService->notifyNextApprover($activity);
-            }
+            // Notify next approver (adviser, since we reset to draft)
+            $this->notificationService->notifyNextApprover($activity);
 
             // Also notify the activity owner of successful resubmission
-            // (reuse submitted message semantics)
-            // This informs the student their resubmission has been sent to the appropriate role
-            // without re-notifying all initial approvers unnecessarily.
-            // We'll keep using the existing success pattern by sending a direct notification to the owner.
-            // Implemented inside NotificationService method below.
             $this->notificationService->notifyOwnerResubmitted($activity, $rejector);
         }
 

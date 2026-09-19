@@ -189,6 +189,7 @@
                                 <select name="format" class="form-input" required>
                                     <option value="preview">Preview (Web)</option>
                                     <option value="pdf">PDF Download</option>
+                                    <option value="docx">Word/DOCX Download</option>
                                     <option value="excel">Excel Download</option>
                                 </select>
                             </div>

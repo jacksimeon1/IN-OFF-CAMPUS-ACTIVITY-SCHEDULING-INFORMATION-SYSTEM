@@ -33,29 +33,13 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-// Authentication test route
-Route::get('/auth-test', function () {
-    return view('auth-test');
-});
 
-// Login test route
-Route::get('/test-login', function () {
-    return view('test-login');
-});
-
-// Admin Authentication Routes
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('login', [AdminAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [AdminAuthController::class, 'login']);
-    Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
-
-    // Admin Dashboard Routes (require admin authentication)
-    Route::middleware(['admin'])->group(function () {
-        Route::get('dashboard', [DashboardController::class, 'adminDashboard'])->name('dashboard');
-        Route::get('profile', [DashboardController::class, 'adminProfile'])->name('profile');
-        Route::patch('profile', [DashboardController::class, 'updateAdminProfile'])->name('profile.update');
-        Route::put('password', [DashboardController::class, 'updateAdminPassword'])->name('password.update');
-    });
+// Admin Routes (require admin authentication)
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'adminDashboard'])->name('dashboard');
+    Route::get('profile', [DashboardController::class, 'adminProfile'])->name('profile');
+    Route::patch('profile', [DashboardController::class, 'updateAdminProfile'])->name('profile.update');
+    Route::put('password', [DashboardController::class, 'updateAdminPassword'])->name('password.update');
 });
 
 // Special admin access route
@@ -63,7 +47,7 @@ Route::get('/admin', function () {
     if (auth()->check() && auth()->user()->role === 'admin') {
         return redirect()->route('admin.dashboard');
     }
-    return redirect()->route('admin.login')->with('message', 'Please login with admin credentials to access the admin panel.');
+    return redirect()->route('login')->with('message', 'Please login with admin credentials to access the admin panel.');
 })->name('admin');
 
 // Dashboard Routes
@@ -165,6 +149,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
 
+    // My Approvals - for roles to view activities they approved/noted
+    Route::get('/my-approvals', [App\Http\Controllers\MyApprovalsController::class, 'index'])->name('my-approvals.index');
+    Route::get('/my-approvals/pdf', [App\Http\Controllers\MyApprovalsController::class, 'exportPdf'])->name('my-approvals.pdf');
+    Route::get('/my-approvals/docx', [App\Http\Controllers\MyApprovalsController::class, 'exportDocx'])->name('my-approvals.docx');
 
 
 
@@ -184,6 +172,7 @@ Route::middleware('auth')->group(function () {
 
     // Attachment routes for viewing and downloading files
     Route::get('/attachments/view/{filename}', [AttachmentController::class, 'view'])->name('attachments.view');
+    Route::get('/attachments/view-pdf/{filename}', [AttachmentController::class, 'viewPdf'])->name('attachments.view-pdf');
     Route::get('/attachments/stream-docx/{filename}', [AttachmentController::class, 'streamDocx'])->name('attachments.streamDocx');
     Route::get('/attachments/docx-viewer/{filename}', [AttachmentController::class, 'showDocxViewer'])->name('attachments.docx-viewer');
     Route::get('/attachments/download/{type}/{filename}', [AttachmentController::class, 'download'])->name('activity.download');
@@ -255,8 +244,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Conflict check route (for all authenticated users)
     Route::get('/activities/{activity}/conflicts', [ApprovalController::class, 'checkConflicts'])->name('activities.conflicts');
-    // AJAX conflict checker used by create-activity form
-    Route::post('/activities/check-conflicts', [ActivityController::class, 'checkConflicts'])->name('activities.check-conflicts');
 });
 
 // Admin Routes (require admin authentication)

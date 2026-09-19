@@ -127,7 +127,7 @@
                                 <i class="fas fa-info-circle text-yellow-600 mr-2 mt-0.5"></i>
                                 <div>
                                     <p class="text-sm text-yellow-800 font-medium">
-                                        Submission deadline: submit at least <strong>7 days</strong> before your activity start date.
+                                        Submission deadline: submit at least <strong>5 days</strong> before your activity start date.
                                     </p>
                                     <p id="deadline-detail" class="text-xs text-yellow-700 mt-1">
                                         Select a start date to check if the requirement is met.
@@ -186,6 +186,10 @@
                                 <label for="location" class="block text-sm font-medium text-gray-700 mb-2">
                                     Venue <span class="text-red-500">*</span>
                                 </label>
+                                <p id="venue-help" class="text-xs text-gray-500 mb-2">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Please select an activity type first to choose the venue
+                                </p>
                                 <!-- In-Campus dropdown (shown when type = in-campus) -->
                                 <select id="location_select" name="location" class="hidden block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 transition-colors">
                                     <option value="">Select Venue</option>
@@ -197,6 +201,7 @@
 
                                 <!-- Off-Campus free text (default) -->
                                 <input type="text" id="location_input" value="{{ old('location') }}" required
+                                       placeholder="Enter off-campus venue location"
                                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 transition-colors">
                                 @error('location')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -690,7 +695,8 @@
         const typeEl = document.getElementById('type');
         const selectEl = document.getElementById('location_select');
         const inputEl = document.getElementById('location_input');
-        if (!typeEl || !selectEl || !inputEl) return;
+        const helpEl = document.getElementById('venue-help');
+        if (!typeEl || !selectEl || !inputEl || !helpEl) return;
 
         if (typeEl.value === 'in-campus') {
             // show dropdown, hide input
@@ -702,7 +708,12 @@
             // Ensure required on the active one only
             selectEl.setAttribute('required', 'required');
             inputEl.removeAttribute('required');
-        } else {
+            // Enable the dropdown
+            selectEl.disabled = false;
+            // Update help message
+            helpEl.innerHTML = '<i class="fas fa-check-circle mr-1 text-green-600"></i>Select an in-campus venue from the dropdown';
+            helpEl.className = 'text-xs text-green-600 mb-2';
+        } else if (typeEl.value === 'off-campus') {
             // show input, hide dropdown
             inputEl.classList.remove('hidden');
             selectEl.classList.add('hidden');
@@ -710,6 +721,28 @@
             selectEl.removeAttribute('name');
             inputEl.setAttribute('required', 'required');
             selectEl.removeAttribute('required');
+            // Enable the input
+            inputEl.disabled = false;
+            // Update help message
+            helpEl.innerHTML = '<i class="fas fa-map-marker-alt mr-1 text-blue-600"></i>Enter the off-campus venue location';
+            helpEl.className = 'text-xs text-blue-600 mb-2';
+        } else {
+            // No type selected - hide both and disable
+            selectEl.classList.add('hidden');
+            inputEl.classList.add('hidden');
+            selectEl.removeAttribute('name');
+            inputEl.removeAttribute('name');
+            selectEl.removeAttribute('required');
+            inputEl.removeAttribute('required');
+            // Disable both fields
+            selectEl.disabled = true;
+            inputEl.disabled = true;
+            // Clear values
+            selectEl.value = '';
+            inputEl.value = '';
+            // Update help message
+            helpEl.innerHTML = '<i class="fas fa-info-circle mr-1"></i>Please select an activity type first to choose the venue';
+            helpEl.className = 'text-xs text-gray-500 mb-2';
         }
     }
 
@@ -810,14 +843,14 @@
             const diffMs = start.getTime() - today.getTime();
             const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-            if (days >= 7) {
+            if (days >= 5) {
                 noticeEl.querySelector('div').className = 'bg-green-50 border border-green-200 rounded-lg p-3 flex items-start';
                 detailEl.className = 'text-xs text-green-700 mt-1';
                 detailEl.innerHTML = `<span class="text-green-800 font-semibold"><i class="fas fa-check-circle mr-1"></i> Requirement met.</span> ${days} day(s) before the scheduled date (${val}).`;
             } else {
                 noticeEl.querySelector('div').className = 'bg-red-50 border border-red-200 rounded-lg p-3 flex items-start';
                 detailEl.className = 'text-xs text-red-700 mt-1';
-                detailEl.innerHTML = `<span class=\"text-red-800 font-semibold\"><i class=\"fas fa-exclamation-triangle mr-1\"></i> Requirement not met.</span> Only ${days} day(s) before the scheduled date (${val}). Submit at least 7 days prior.`;
+                detailEl.innerHTML = `<span class=\"text-red-800 font-semibold\"><i class=\"fas fa-exclamation-triangle mr-1\"></i> Requirement not met.</span> Only ${days} day(s) before the scheduled date (${val}). Submit at least 5 days prior.`;
             }
         }
 

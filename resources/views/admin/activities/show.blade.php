@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Storage;
                 <p class="text-gray-600">Submitted by {{ $activity->user->name }}</p>
             </div>
             <div class="flex items-center">
-                <a href="{{ route('admin.activities') }}" class="skew-button back-button">
+                <a href="{{ route('admin.dashboard', ['tab' => 'activities']) }}" class="skew-button back-button">
                     <span>Back to List</span>
                 </a>
                 <a href="{{ route('admin.activities.edit-status', $activity) }}" class="skew-button edit-button">
@@ -253,7 +253,7 @@ use Illuminate\Support\Facades\Storage;
                                 $filename = basename($activity->budget_file);
                             @endphp
                             @if($budgetExt === 'docx')
-                                <a href="#" onclick="showDocxViewer('{{ route('attachments.streamDocx', ['filename' => $filename]) }}'); return false;" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                <a href="{{ route('attachments.docx-viewer', ['filename' => $filename]) }}" target="_blank" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
                                     <i class="fas fa-eye mr-1"></i> View Document
                                 </a>
                             @else
@@ -282,7 +282,7 @@ use Illuminate\Support\Facades\Storage;
                                 $filename = basename($activity->permit_file);
                             @endphp
                             @if($permitExt === 'docx')
-                                <a href="#" onclick="showDocxViewer('{{ route('attachments.streamDocx', ['filename' => $filename]) }}'); return false;" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                <a href="{{ route('attachments.docx-viewer', ['filename' => $filename]) }}" target="_blank" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
                                     <i class="fas fa-eye mr-1"></i> View Document
                                 </a>
                             @else
@@ -311,7 +311,7 @@ use Illuminate\Support\Facades\Storage;
                                 $filename = basename($activity->supporting_documents);
                             @endphp
                             @if($suppExt === 'docx')
-                                <a href="#" onclick="showDocxViewer('{{ route('attachments.streamDocx', ['filename' => $filename]) }}'); return false;" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                <a href="{{ route('attachments.docx-viewer', ['filename' => $filename]) }}" target="_blank" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
                                     <i class="fas fa-eye mr-1"></i> View Document
                                 </a>
                             @else
@@ -351,13 +351,7 @@ use Illuminate\Support\Facades\Storage;
                         <div class="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{{ $activity->user->email }}</div>
                     </div>
                     
-                    @if($activity->user->student_id)
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
-                        <div class="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{{ $activity->user->student_id }}</div>
-                    </div>
-                    @endif
-                    
+
                     @if($activity->user->department)
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
@@ -365,19 +359,6 @@ use Illuminate\Support\Facades\Storage;
                     </div>
                     @endif
                     
-                    @if($activity->user->course)
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Course</label>
-                        <div class="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{{ $activity->user->course }}</div>
-                    </div>
-                    @endif
-                    
-                    @if($activity->user->year_level)
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Year Level</label>
-                        <div class="p-3 bg-gray-50 rounded-lg text-sm text-gray-900">{{ $activity->user->year_level }}</div>
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -393,20 +374,6 @@ use Illuminate\Support\Facades\Storage;
             </div>
             <div class="p-6">
                 <x-approval-workflow-status :activity="$activity" />
-            </div>
-        </div>
-
-        <!-- Admin Actions -->
-        <div class="bg-white overflow-hidden shadow-green sm:rounded-xl mb-6 border-2 border-yellow-500" style="border: 3px solid #eab308 !important;">
-            <div class="p-6 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                    <i class="fas fa-cogs text-green-600 mr-2"></i>
-                    Admin Actions
-                </h3>
-                <p class="text-sm text-gray-600 mt-1">Administrative actions and workflow management</p>
-            </div>
-            <div class="p-6">
-                <x-approval-workflow-actions :activity="$activity" />
             </div>
         </div>
 

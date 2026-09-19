@@ -162,7 +162,7 @@
                             @if($activity->budget && $activity->budget < 1000)
                                 <li class="text-yellow-600">⚠️ Budget appears to be low for this type of activity</li>
                             @endif
-                            @if($activity->activity_date->diffInDays(now()) < 7)
+                            @if($activity->activity_date->diffInDays(now()) < 5)
                                 <li class="text-orange-600">⚠️ Activity is scheduled less than a week from now</li>
                             @endif
                             <li>Activity type: {{ ucfirst(str_replace('-', ' ', $activity->type)) }}</li>

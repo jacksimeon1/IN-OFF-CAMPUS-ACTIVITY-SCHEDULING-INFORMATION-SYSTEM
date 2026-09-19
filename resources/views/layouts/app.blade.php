@@ -43,6 +43,10 @@
                 --gray-900: #111827;
             }
 
+            html {
+                font-size: 13px !important; 
+            }
+
             body {
                 font-family: 'Inter', sans-serif;
                 background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
@@ -95,22 +99,22 @@
             /* Responsive scaling with zoom and font-size combination */
             @media (max-width: 1400px) {
                 html { font-size: 15px; }
-                body { zoom: 0.95; }
+                body { zoom: 0.75; }
             }
 
             @media (max-width: 1200px) {
                 html { font-size: 14px; }
-                body { zoom: 0.9; }
+                body { zoom: 0.7; }
             }
 
             @media (max-width: 992px) {
                 html { font-size: 13px; }
-                body { zoom: 0.85; }
+                body { zoom: 0.65; }
             }
 
             @media (max-width: 768px) {
                 html { font-size: 12px; }
-                body { zoom: 0.8; }
+                body { zoom: 0.6; }
 
                 /* Ensure horizontal scrolling works */
                 .overflow-x-auto, .table-responsive {
@@ -121,22 +125,22 @@
 
             @media (max-width: 576px) {
                 html { font-size: 11px; }
-                body { zoom: 0.75; }
+                body { zoom: 0.55; }
             }
 
             @media (max-width: 480px) {
                 html { font-size: 10px; }
-                body { zoom: 0.7; }
+                body { zoom: 0.5; }
             }
 
             @media (max-width: 360px) {
                 html { font-size: 9px; }
-                body { zoom: 0.65; }
+                body { zoom: 0.45; }
             }
 
             @media (max-width: 320px) {
                 html { font-size: 8px; }
-                body { zoom: 0.6; }
+                body { zoom: 0.4; }
             }
 
             /* Preserve interactive element accessibility */

@@ -82,7 +82,7 @@ class DirectorController extends Controller
 
     public function updatePassword(Request $request)
     {
-        $request->validate([
+        $request->validateWithBag('updatePassword', [
             'current_password' => ['required', 'current_password'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);

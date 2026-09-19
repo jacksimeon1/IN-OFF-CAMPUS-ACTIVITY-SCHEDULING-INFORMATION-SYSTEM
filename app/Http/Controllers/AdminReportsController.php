@@ -47,7 +47,7 @@ class AdminReportsController extends Controller
             'status' => 'nullable|string',
             'department' => 'nullable|string',
             'type' => 'nullable|string',
-            'format' => 'required|in:preview,pdf,excel'
+            'format' => 'required|in:preview,pdf,excel,docx'
         ]);
 
         // Build query based on filters with comprehensive relationships
@@ -143,6 +143,14 @@ class AdminReportsController extends Controller
                     'Content-Disposition' => 'inline; filename="activities-report-' . now()->format('Y-m-d') . '.html"'
                 ]);
 
+            case 'docx':
+                // Return HTML view optimized for Word Document
+                $html = view('admin.reports.activities-docx', $reportData)->render();
+                return Response::make($html, 200, [
+                    'Content-Type' => 'application/vnd.ms-word',
+                    'Content-Disposition' => 'attachment; filename="activities-report-' . now()->format('Y-m-d') . '.doc"'
+                ]);
+
             case 'excel':
                 // Generate CSV format for Excel compatibility
                 return $this->generateActivitiesCSV($reportData);
@@ -161,7 +169,7 @@ class AdminReportsController extends Controller
             'role' => 'nullable|string',
             'department' => 'nullable|string',
             'status' => 'nullable|in:active,inactive',
-            'format' => 'required|in:preview,pdf,excel'
+            'format' => 'required|in:preview,pdf,excel,docx'
         ]);
 
         // Build query based on filters
@@ -212,6 +220,14 @@ class AdminReportsController extends Controller
                     'Content-Disposition' => 'inline; filename="users-report-' . now()->format('Y-m-d') . '.html"'
                 ]);
 
+            case 'docx':
+                // Return HTML view as Word Document
+                $html = view('admin.reports.users-docx', $reportData)->render();
+                return Response::make($html, 200, [
+                    'Content-Type' => 'application/vnd.ms-word',
+                    'Content-Disposition' => 'attachment; filename="users-report-' . now()->format('Y-m-d') . '.doc"'
+                ]);
+
             case 'excel':
                 // Generate CSV format for Excel compatibility
                 return $this->generateUsersCSV($reportData);
@@ -228,7 +244,7 @@ class AdminReportsController extends Controller
     {
         $request->validate([
             'period' => 'required|in:week,month,quarter,year',
-            'format' => 'required|in:preview,pdf,excel'
+            'format' => 'required|in:preview,pdf,excel,docx'
         ]);
 
         $period = $request->period;
@@ -290,6 +306,14 @@ class AdminReportsController extends Controller
                     'Content-Disposition' => 'inline; filename="statistics-report-' . now()->format('Y-m-d') . '.html"'
                 ]);
 
+            case 'docx':
+                // Return HTML view as Word Document
+                $html = view('admin.reports.statistics-docx', $reportData)->render();
+                return Response::make($html, 200, [
+                    'Content-Type' => 'application/vnd.ms-word',
+                    'Content-Disposition' => 'attachment; filename="statistics-report-' . now()->format('Y-m-d') . '.doc"'
+                ]);
+
             case 'excel':
                 // Generate CSV format for Excel compatibility
                 return $this->generateStatisticsCSV($reportData);
@@ -314,7 +338,10 @@ class AdminReportsController extends Controller
 
         return response()->json([
             'departments' => $schoolDepartments,
-            'activity_types' => Activity::distinct()->pluck('type')->filter()->sort()->values(),
+            'activity_types' => [
+                ['id' => 'in-campus', 'name' => 'In Campus'],
+                ['id' => 'off-campus', 'name' => 'Off Campus']
+            ],
             'roles' => User::distinct()->pluck('role')->filter()->sort()->values(),
             'workflow_statuses' => [
                 'draft' => 'Draft',
@@ -392,29 +419,25 @@ class AdminReportsController extends Controller
 
             // Add CSV headers
             fputcsv($file, [
-                'ID',
                 'Name',
                 'Email',
                 'Role',
                 'Department',
                 'Status',
                 'Total Activities',
-                'Approved Activities',
-                'Registration Date'
+                'Approved Activities'
             ]);
 
             // Add data rows
             foreach ($reportData['users'] as $user) {
                 fputcsv($file, [
-                    $user->id,
                     $user->name,
                     $user->email,
                     ucfirst($user->role),
                     $user->department ?? 'N/A',
                     $user->email_verified_at ? 'Active' : 'Inactive',
                     $user->activities->count(),
-                    $user->activities->where('workflow_status', 'approved_by_vp')->count(),
-                    $user->created_at->format('Y-m-d')
+                    $user->activities->where('workflow_status', 'approved_by_vp')->count()
                 ]);
             }
 

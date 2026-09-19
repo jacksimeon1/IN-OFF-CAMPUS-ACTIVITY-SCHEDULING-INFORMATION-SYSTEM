@@ -79,13 +79,21 @@
         viewDocument(url, filename, downloadUrl);
     }
 
-    function showDocxViewer(url, downloadUrl) {
-        console.log('Legacy showDocxViewer called:', url);
+    function showDocxViewer(filenameOrUrl, downloadUrl) {
+        console.log('showDocxViewer called:', filenameOrUrl);
         
-        const filename = getFilenameFromUrl(url);
+        // Check if it's a URL or just a filename
+        let filename;
+        if (filenameOrUrl.includes('/')) {
+            // It's a URL, extract filename
+            filename = getFilenameFromUrl(filenameOrUrl);
+        } else {
+            // It's already a filename
+            filename = filenameOrUrl;
+        }
         
-        // Use the dedicated DOCX viewer
-        const docxViewerUrl = url.replace('/attachments/view/', '/attachments/docx-viewer/');
+        // Use the dedicated DOCX viewer with the same URL pattern as other roles
+        const docxViewerUrl = `/attachments/docx-viewer/${encodeURIComponent(filename)}`;
         console.log('Opening DOCX viewer:', docxViewerUrl);
         window.open(docxViewerUrl, '_blank');
     }

@@ -17,12 +17,12 @@ class AdminMiddleware
     {
         // Check if user is authenticated
         if (!auth()->check()) {
-            return redirect()->route('admin.login');
+            return redirect()->route('login');
         }
 
         // Check if user has admin role
         if (auth()->user()->role !== 'admin') {
-            return redirect()->route('admin.login')->withErrors([
+            return redirect()->route('login')->withErrors([
                 'email' => 'Access denied. Admin credentials required.',
             ]);
         }

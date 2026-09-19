@@ -46,10 +46,6 @@ class DashboardController extends Controller
     {
         $tab = $request->get('tab', 'dashboard');
         
-        // Debug logging for activities tab
-        if ($tab === 'activities') {
-            \Log::info('Admin Dashboard: Loading activities tab');
-        }
         // Initialize variables to avoid undefined errors
         $stats = $workflowStats = $monthlySubmissions = $weeklySubmissions = $statusDistribution = null;
         $recentActivities = $activeOrganizations = null;
@@ -61,8 +57,15 @@ class DashboardController extends Controller
         if (in_array($tab, ['dashboard', 'analytics', 'accounts'], true)) {
             $stats = [
                 'total_activities' => Activity::count(),
-                'pending_activities' => Activity::where('status', 'pending')->count(),
-                'approved_activities' => Activity::where('workflow_status', 'approved_by_vp')->count(),
+                'pending_activities' => Activity::where(function($query) {
+                    $query->where('status', 'pending')
+                          ->where('workflow_status', '!=', 'approved_by_vp')
+                          ->where('status', '!=', 'approved');
+                })->count(),
+                'approved_activities' => Activity::where(function($query) {
+                    $query->where('workflow_status', 'approved_by_vp')
+                          ->orWhere('status', 'approved');
+                })->count(),
                 'rejected_activities' => Activity::where('status', 'rejected')->count(),
                 'total_users' => User::count(),
                 'total_students' => User::where('role', 'student')->count(),
@@ -127,7 +130,7 @@ class DashboardController extends Controller
 
             // Recent activities - optimized
             $recentActivities = Activity::with(['user:id,name,email'])
-                ->select('id', 'title', 'description', 'type', 'activity_date', 'end_date', 'status', 'workflow_status', 'created_at', 'user_id')
+                ->select('id', 'title', 'type', 'activity_date', 'end_date', 'status', 'workflow_status', 'created_at', 'user_id')
                 ->orderBy('created_at', 'desc')
                 ->limit(5)
                 ->get();
@@ -334,7 +337,7 @@ class DashboardController extends Controller
 
         // Overall statistics
         $totalActivities = Activity::count();
-        $pendingApprovals = Activity::whereIn('workflow_status', [
+        $pendingApprovalCount = Activity::whereIn('workflow_status', [
             'draft', 'noted_by_adviser', 'noted_by_dean', 'reviewed_by_psg', 'endorsed_by_director'
         ])->count();
         $approvedActivities = Activity::where('workflow_status', 'approved_by_vp')->count();
@@ -391,7 +394,7 @@ class DashboardController extends Controller
             'recentDecisions',
             'decisionStats',
             'totalActivities',
-            'pendingApprovals',
+            'pendingApprovalCount',
             'approvedActivities',
             'rejectedActivities',
             'workflowCounts',

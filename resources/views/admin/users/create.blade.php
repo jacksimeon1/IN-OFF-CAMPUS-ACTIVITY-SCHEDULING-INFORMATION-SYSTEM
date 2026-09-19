@@ -85,27 +85,19 @@
                             <x-input-error :messages="$errors->get('role')" class="mt-2" />
                         </div>
 
-                        <!-- School -->
-                        <div class="mb-4">
+                        <!-- Department -->
+                        <div class="mb-4" id="department-field">
                             <x-input-label for="department" :value="__('Department/School Assignment')" />
                             <select id="department" name="department" class="block mt-1 w-full border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-md shadow-sm">
                                 <option value="">Select Department/School</option>
-                                <optgroup label="SPUP Schools (for Deans)">
-                                    <option value="SCHOOL OF ARTS, SCIENCES AND TEACHER EDUCATION" {{ old('department') === 'SCHOOL OF ARTS, SCIENCES AND TEACHER EDUCATION' ? 'selected' : '' }}>SCHOOL OF ARTS, SCIENCES AND TEACHER EDUCATION</option>
-                                    <option value="SCHOOL OF BUSINESS, ACCOUNTANCY AND HOSPITALITY MANAGEMENT" {{ old('department') === 'SCHOOL OF BUSINESS, ACCOUNTANCY AND HOSPITALITY MANAGEMENT' ? 'selected' : '' }}>SCHOOL OF BUSINESS, ACCOUNTANCY AND HOSPITALITY MANAGEMENT</option>
-                                    <option value="SCHOOL OF INFORMATION TECHNOLOGY AND ENGINEERING" {{ old('department') === 'SCHOOL OF INFORMATION TECHNOLOGY AND ENGINEERING' ? 'selected' : '' }}>SCHOOL OF INFORMATION TECHNOLOGY AND ENGINEERING</option>
-                                    <option value="SCHOOL OF NURSING AND ALLIED HEALTH SCIENCES" {{ old('department') === 'SCHOOL OF NURSING AND ALLIED HEALTH SCIENCES' ? 'selected' : '' }}>SCHOOL OF NURSING AND ALLIED HEALTH SCIENCES</option>
-                                    <option value="SCHOOL OF MEDICINE" {{ old('department') === 'SCHOOL OF MEDICINE' ? 'selected' : '' }}>SCHOOL OF MEDICINE</option>
-                                </optgroup>
-                                <optgroup label="Administrative Departments">
-                                    <option value="Office of Student Affairs" {{ old('department') === 'Office of Student Affairs' ? 'selected' : '' }}>Office of Student Affairs</option>
-                                    <option value="Student Officer Affairs" {{ old('department') === 'Student Officer Affairs' ? 'selected' : '' }}>Student Officer Affairs</option>
-                                    <option value="IT Department" {{ old('department') === 'IT Department' ? 'selected' : '' }}>IT Department</option>
-                                    <option value="Other" {{ old('department') === 'Other' ? 'selected' : '' }}>Other</option>
-                                </optgroup>
+                                <option value="SCHOOL OF ARTS, SCIENCES AND TEACHER EDUCATION" {{ old('department') === 'SCHOOL OF ARTS, SCIENCES AND TEACHER EDUCATION' ? 'selected' : '' }}>SCHOOL OF ARTS, SCIENCES AND TEACHER EDUCATION</option>
+                                <option value="SCHOOL OF BUSINESS, ACCOUNTANCY AND HOSPITALITY MANAGEMENT" {{ old('department') === 'SCHOOL OF BUSINESS, ACCOUNTANCY AND HOSPITALITY MANAGEMENT' ? 'selected' : '' }}>SCHOOL OF BUSINESS, ACCOUNTANCY AND HOSPITALITY MANAGEMENT</option>
+                                <option value="SCHOOL OF INFORMATION TECHNOLOGY AND ENGINEERING" {{ old('department') === 'SCHOOL OF INFORMATION TECHNOLOGY AND ENGINEERING' ? 'selected' : '' }}>SCHOOL OF INFORMATION TECHNOLOGY AND ENGINEERING</option>
+                                <option value="SCHOOL OF NURSING AND ALLIED HEALTH SCIENCES" {{ old('department') === 'SCHOOL OF NURSING AND ALLIED HEALTH SCIENCES' ? 'selected' : '' }}>SCHOOL OF NURSING AND ALLIED HEALTH SCIENCES</option>
+                                <option value="SCHOOL OF MEDICINE" {{ old('department') === 'SCHOOL OF MEDICINE' ? 'selected' : '' }}>SCHOOL OF MEDICINE</option>
                             </select>
                             <x-input-error :messages="$errors->get('department')" class="mt-2" />
-                            <p class="mt-1 text-xs text-gray-500">
+                            <p class="mt-1 text-xs text-gray-500" id="department-help">
                                 <strong>For Deans:</strong> Select the specific SPUP School you will oversee. Only activities from that school will be routed to you.
                             </p>
                         </div>
@@ -233,13 +225,57 @@
             const role = this.value;
             const courseField = document.getElementById('course-field');
             const yearField = document.getElementById('year-field');
+            const departmentField = document.getElementById('department-field');
+            const departmentHelp = document.getElementById('department-help');
+            const departmentSelect = document.getElementById('department');
             
+            // Always clear department field when role changes
+            departmentSelect.value = '';
+            
+            // Set required attribute based on role
+            if (role === 'dean' || role === 'student' || role === 'adviser') {
+                departmentSelect.required = true;
+            } else {
+                departmentSelect.required = false;
+            }
+            
+            // Show/hide fields based on role
             if (role === 'student') {
                 courseField.style.display = 'block';
                 yearField.style.display = 'block';
-            } else {
+                departmentField.style.display = 'block';
+                departmentHelp.innerHTML = '<strong>For Student Officers:</strong> Select the department you belong to.';
+            } else if (role === 'dean') {
                 courseField.style.display = 'none';
                 yearField.style.display = 'none';
+                departmentField.style.display = 'block';
+                departmentHelp.innerHTML = '<strong>For Deans:</strong> Select the specific SPUP School you will oversee.';
+            } else if (role === 'director') {
+                courseField.style.display = 'none';
+                yearField.style.display = 'none';
+                departmentField.style.display = 'none';
+                departmentHelp.innerHTML = '<strong>For Directors:</strong> Department is not required.';
+            } else if (role === 'adviser') {
+                courseField.style.display = 'none';
+                yearField.style.display = 'none';
+                departmentField.style.display = 'block';
+                departmentHelp.innerHTML = '<strong>For Advisers:</strong> Select the department you will be assigned to for noting activities.';
+            } else if (role === 'psg_adviser') {
+                courseField.style.display = 'none';
+                yearField.style.display = 'none';
+                departmentField.style.display = 'none';
+                departmentHelp.innerHTML = '<strong>For PSG Council Advisers:</strong> Department is not required.';
+            } else if (role === 'vp') {
+                courseField.style.display = 'none';
+                yearField.style.display = 'none';
+                departmentField.style.display = 'none';
+                departmentHelp.innerHTML = '<strong>For VP Acads:</strong> Department is not required.';
+            } else {
+                // No role selected
+                courseField.style.display = 'none';
+                yearField.style.display = 'none';
+                departmentField.style.display = 'none';
+                departmentHelp.innerHTML = 'Select a role to see relevant options.';
             }
         });
 
@@ -248,10 +284,26 @@
             const roleSelect = document.getElementById('role');
             if (roleSelect.value) {
                 roleSelect.dispatchEvent(new Event('change'));
+            } else {
+                // Hide all fields initially
+                document.getElementById('course-field').style.display = 'none';
+                document.getElementById('year-field').style.display = 'none';
+                document.getElementById('department-field').style.display = 'none';
+                document.getElementById('department-help').innerHTML = 'Select a role to see relevant options.';
             }
         });
 
-
+        // Add form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const role = document.getElementById('role').value;
+            const department = document.getElementById('department').value;
+            
+            if ((role === 'dean' || role === 'student' || role === 'adviser') && !department) {
+                e.preventDefault();
+                alert('Please select a department for the ' + role.replace('_', ' ').toUpperCase() + ' role.');
+                document.getElementById('department').focus();
+            }
+        });
     </script>
     @endpush
 </div>

@@ -34,11 +34,6 @@ Notes:
 - Password: `adviser123`
 - Role: `adviser`
 
-Additional adviser from `UserSeeder`:
-- Email: `adviser@spup.edu.ph` — SCHOOL OF INFORMATION TECHNOLOGY AND ENGINEERING
-- Password: `password`
-- Role: `adviser`
-
 ## Deans
 - Emails:
   - `dean.aste@spup.edu.ph` — SCHOOL OF ARTS, SCIENCES AND TEACHER EDUCATION

@@ -45,7 +45,7 @@
                                 <i class="fas fa-info-circle text-yellow-600 mr-2 mt-0.5"></i>
                                 <div>
                                     <p class="text-sm text-yellow-800 font-medium">
-                                        Submission deadline: submit at least <strong>7 days</strong> before your activity start date.
+                                        Submission deadline: submit at least <strong>5 days</strong> before your activity start date.
                                     </p>
                                     <p id="deadline-detail" class="text-xs text-yellow-700 mt-1">
                                         Start date is pre-filled. The system will check compliance automatically.
@@ -337,38 +337,36 @@
 
 @push('scripts')
 <script>
-// Effective document preview function
+// Include Mammoth.js for DOCX viewing
+const script = document.createElement('script');
+script.src = 'https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js';
+document.head.appendChild(script);
+
+// Enhanced document preview function with Mammoth.js support
 window.showDocumentPreview = function(url, type) {
     console.log('showDocumentPreview called with:', { url, type });
     
     const modal = document.getElementById('documentPreviewModal');
     const content = document.getElementById('documentPreviewContent');
     
+    // Check if it's a DOCX file
+    if (type === 'docx' || url.toLowerCase().includes('.docx')) {
+        // Extract filename from URL
+        const filename = url.split('/').pop();
+        
+        // Route to our Mammoth.js viewer
+        const docxViewerUrl = '/attachments/docx-viewer/' + encodeURIComponent(filename);
+        console.log('Opening DOCX viewer:', docxViewerUrl);
+        window.open(docxViewerUrl, '_blank');
+        return false;
+    }
+    
     if (type === 'pdf') {
         content.innerHTML = `<iframe src="${url}" frameborder="0" style="width:100%;height:640px;"></iframe>`;
-    } else if (type && type.toLowerCase() === 'docx') {
-        // Use Google Docs viewer for DOCX files - this works reliably
-        const fullUrl = window.location.origin + url;
-        const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fullUrl)}&embedded=true`;
-        content.innerHTML = `
-            <div style="text-align: center; padding: 20px;">
-                <p style="margin-bottom: 15px; color: #666;">Loading DOCX document...</p>
-                <iframe src="${googleViewerUrl}" frameborder="0" style="width:100%;height:600px;" 
-                        onload="this.previousElementSibling.style.display='none';"
-                        onerror="this.previousElementSibling.innerHTML='<p style=color:red;>Unable to load document preview. <a href=${url} target=_blank>Click here to download</a></p>';">
-                </iframe>
-            </div>`;
     } else if (['jpg', 'jpeg', 'png', 'gif'].includes(type)) {
-        content.innerHTML = `<img src="${url}" class="max-w-full h-auto mx-auto" />`;
+        content.innerHTML = `<img src="${url}" style="max-width:100%;height:auto;" alt="Document image">`;
     } else {
-        // Fallback for other file types
-        content.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <p style="margin-bottom: 15px;">Cannot preview this file type in browser.</p>
-                <a href="${url}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    <i class="fas fa-external-link-alt mr-2"></i> Open in New Tab
-                </a>
-            </div>`;
+        content.innerHTML = `<div style="text-align:center;padding:50px;"><p>Preview not available for this file type.</p><a href="${url}" target="_blank">Download file</a></div>`;
     }
     
     modal.classList.remove('hidden');
@@ -414,14 +412,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const diffMs = start.getTime() - today.getTime();
         const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-        if (days >= 7) {
+        if (days >= 5) {
             noticeEl.querySelector('div').className = 'bg-green-50 border border-green-200 rounded-lg p-3 flex items-start';
             detailEl.className = 'text-xs text-green-700 mt-1';
             detailEl.innerHTML = `<span class="text-green-800 font-semibold"><i class="fas fa-check-circle mr-1"></i> Requirement met.</span> ${days} day(s) before the scheduled date (${val}).`;
         } else {
             noticeEl.querySelector('div').className = 'bg-red-50 border border-red-200 rounded-lg p-3 flex items-start';
             detailEl.className = 'text-xs text-red-700 mt-1';
-            detailEl.innerHTML = `<span class=\"text-red-800 font-semibold\"><i class=\"fas fa-exclamation-triangle mr-1\"></i> Requirement not met.</span> Only ${days} day(s) before the scheduled date (${val}). Submit at least 7 days prior.`;
+            detailEl.innerHTML = `<span class=\"text-red-800 font-semibold\"><i class=\"fas fa-exclamation-triangle mr-1\"></i> Requirement not met.</span> Only ${days} day(s) before the scheduled date (${val}). Submit at least 5 days prior.`;
         }
     }
 

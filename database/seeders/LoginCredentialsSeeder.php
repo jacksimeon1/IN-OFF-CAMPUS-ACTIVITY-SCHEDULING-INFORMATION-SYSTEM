@@ -131,8 +131,10 @@ class LoginCredentialsSeeder extends Seeder
                     'email' => $dean['email'],
                     'password' => Hash::make('dean123'),
                     'role' => 'dean',
+                    'department' => $dean['school'],
                     'school' => $dean['school'],
                     'email_verified_at' => now(),
+                    'is_active' => true,
                 ]
             );
         }
