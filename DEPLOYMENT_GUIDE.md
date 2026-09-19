@@ -2,27 +2,13 @@
 
 ## Step 1: Create GitHub Repository
 
-1. Go to https://github.com/jacksimeon1
-2. Click the "+" button and select "New repository"
-3. Name it: `spup-activity-system`
-4. Make it **Public** (for portfolio visibility)
-5. **Don't** initialize with README (we'll push existing code)
-6. Click "Create repository"
+✅ **Already completed!** Repository created at:
+https://github.com/jacksimeon1/IN-OFF-CAMPUS-ACTIVITY-SCHEDULING-INFORMATION-SYSTEM
 
 ## Step 2: Connect to Your GitHub Account
 
-Run these commands in your project directory:
-
-```bash
-# Remove current remote
-git remote remove origin
-
-# Add your GitHub repository
-git remote add origin https://github.com/jacksimeon1/spup-activity-system.git
-
-# Push to GitHub
-git push -u origin main
-```
+✅ **Already completed!** Your code is now at:
+https://github.com/jacksimeon1/IN-OFF-CAMPUS-ACTIVITY-SCHEDULING-INFORMATION-SYSTEM
 
 ## Step 3: Deployment Options
 
