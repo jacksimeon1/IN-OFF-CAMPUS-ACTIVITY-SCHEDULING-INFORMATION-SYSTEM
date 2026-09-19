@@ -1,0 +1,59 @@
+services:
+  # Web Service
+  - type: web
+    name: spup-activity-system
+    env: php
+    plan: free
+    buildCommand: |
+      composer install --no-interaction --prefer-dist --optimize-autoloader
+      php artisan key:generate
+      php artisan migrate --force
+      php artisan db:seed --force
+      php artisan storage:link
+    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://spup-activity-system.onrender.com
+      - key: APP_KEY
+        generate: true
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: spup-activity-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: spup-activity-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: spup-activity-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: spup-activity-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: spup-activity-db
+          property: password
+      - key: CACHE_DRIVER
+        value: file
+      - key: SESSION_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: error
+
+databases:
+  - name: spup-activity-db
+    databaseName: spup_activity
+    user: spup_user
